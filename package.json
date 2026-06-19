@@ -1,0 +1,37 @@
+{
+  "name": "cap-app",
+  "version": "1.0.0",
+  "description": "CAP Generator — ForeFlight/Jeppesen Military Aviation Sales Tool",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "package": "electron-builder --mac --universal",
+    "publish": "electron-builder --mac --universal --publish always"
+  },
+  "build": {
+    "appId": "com.foreflight.capgenerator",
+    "productName": "CAP Generator",
+    "files": ["CAP_Generator.html", "main.js"],
+    "mac": {
+      "icon": "icon.icns",
+      "target": [
+        {"target": "dir", "arch": ["universal"]},
+        {"target": "zip", "arch": ["universal"]}
+      ]
+    },
+    "publish": {
+      "provider": "github",
+      "owner": "amcmillan87",
+      "repo": "cap-generator"
+    }
+  },
+  "keywords": [],
+  "author": "Alexander McMillan",
+  "license": "ISC",
+  "type": "commonjs",
+  "devDependencies": {
+    "electron": "^42.4.1",
+    "electron-builder": "^26.15.3",
+    "electron-packager": "^17.1.2"
+  }
+}

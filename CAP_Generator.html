@@ -118,6 +118,21 @@ canvas{max-width:100%;max-height:calc(100vh - 120px);border:1px solid #1a3a5c;bo
 .dd-item{display:flex;align-items:center;gap:5px;font-size:11px;color:#8899aa;cursor:pointer;padding:2px 0;user-select:none;line-height:1.3}
 .dd-item input[type=checkbox]{accent-color:#4cc9f0;width:12px;height:12px;flex-shrink:0;cursor:pointer}
 .dd-item:hover{color:#ccd8e8}
+/* ── Welcome overlay ──────────────────────────── */
+#welcome-overlay{position:fixed;inset:0;background:rgba(4,10,22,0.97);z-index:10000;display:none;flex-direction:column;align-items:center;justify-content:center;gap:28px}
+#welcome-overlay.visible{display:flex}
+.wo-title{color:#4cc9f0;font-size:24px;font-weight:800;letter-spacing:3px;text-transform:uppercase;text-align:center}
+.wo-sub{color:#4a6a8a;font-size:12px;letter-spacing:1px;text-align:center;margin-top:-16px}
+.vert-cards{display:flex;gap:18px;flex-wrap:wrap;justify-content:center}
+.vert-card{width:200px;background:#0d1b2a;border:1px solid #1e3d5c;border-radius:10px;padding:26px 18px 22px;cursor:pointer;text-align:center;transition:border-color .18s,background .18s,transform .15s;user-select:none}
+.vert-card:hover{border-color:#4cc9f0;background:#111e30;transform:translateY(-3px)}
+.vc-icon{font-size:38px;margin-bottom:12px;display:block}
+.vc-title{font-size:14px;font-weight:800;color:#e8f0fa;letter-spacing:1px;margin-bottom:7px}
+.vc-sub{font-size:10px;color:#4a6a8a;line-height:1.6}
+.vert-badge{font-size:8px;font-weight:800;padding:2px 6px;border-radius:3px;letter-spacing:.5px;margin-left:5px;vertical-align:middle}
+.vb-ma{background:#0f2040;color:#4cc9f0;border:1px solid #1e4080}
+.vb-ca{background:#0f2a18;color:#48d46a;border:1px solid #1e5030}
+.vb-ba{background:#2a1808;color:#f0a050;border:1px solid #5a3010}
 </style>
 </head>
 <body>
@@ -127,7 +142,7 @@ canvas{max-width:100%;max-height:calc(100vh - 120px);border:1px solid #1a3a5c;bo
   <div id="app-title">CAP Generator</div>
 
   <div class="sec">
-    <h3>Unit Info</h3>
+    <h3 id="sec-h3-unitinfo">Unit Info</h3>
     <div style="display:flex;gap:10px;align-items:flex-start;margin-bottom:9px">
       <div style="flex-shrink:0">
         <div id="crest-wrap" onclick="document.getElementById('crest-file').click()" title="Upload squadron crest / unit patch" style="width:56px;height:56px;border:1px dashed #2a5080;border-radius:4px;overflow:hidden;cursor:pointer;background:#060d1a;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:2px">
@@ -139,15 +154,16 @@ canvas{max-width:100%;max-height:calc(100vh - 120px);border:1px solid #1a3a5c;bo
         <button id="crest-clear" onclick="clearCrest()" style="display:none;width:56px;margin-top:3px;background:none;border:none;color:#e63946;font-size:9px;cursor:pointer;font-weight:700;padding:0;text-align:center">✕ Clear</button>
       </div>
       <div style="flex:1;min-width:0">
-        <div class="fld" style="margin-bottom:7px"><label>Unit / Squadron</label><input type="text" id="f-unit" value="ARAC Ft Knox"></div>
-        <div class="fld" style="margin-bottom:0"><label>Organization</label><input type="text" id="f-org" value="United States Army Reserves"></div>
+        <div class="fld" style="margin-bottom:7px"><label id="lbl-unit">Unit / Squadron</label><input type="text" id="f-unit" value="ARAC Ft Knox"></div>
+        <div class="fld" style="margin-bottom:0"><label id="lbl-org">Organization</label><input type="text" id="f-org" value="United States Army Reserves"></div>
       </div>
     </div>
     <div class="two-col">
-      <div class="fld"><label>Aircraft &amp; Tail Count</label><input type="text" id="f-ac" value="BE20, C560" placeholder="e.g. C-12 ×4, KC-46 ×12"></div>
-      <div class="fld"><label>Mission Type</label><input type="text" id="f-mission" value="OSA &amp; Support"></div>
+      <div class="fld"><label id="lbl-ac">Aircraft &amp; Tail Count</label><input type="text" id="f-ac" value="BE20, C560" placeholder="e.g. C-12 ×4, KC-46 ×12"></div>
+      <div class="fld"><label id="lbl-mission">Mission Type</label><input type="text" id="f-mission" value="OSA &amp; Support"></div>
     </div>
-    <div class="fld"><label>Location / Base</label><input type="text" id="f-location" placeholder="e.g. McConnell AFB, KS"></div>
+    <div class="fld" id="part-fld" style="display:none"><label>FAA Part</label><select id="f-part" onchange="STATE.part=this.value;schedRender();debouncedProjectSave()"><option value="Part 91">Part 91</option><option value="Part 91K">Part 91K Fractional</option><option value="Part 135">Part 135</option></select></div>
+    <div class="fld"><label id="lbl-location">Location / Base</label><input type="text" id="f-location" placeholder="e.g. McConnell AFB, KS"></div>
   </div>
 
   <div class="sec">
@@ -155,7 +171,7 @@ canvas{max-width:100%;max-height:calc(100vh - 120px);border:1px solid #1a3a5c;bo
     <div class="fld"><label>Region / Country</label><select id="f-region" onchange="onRegionChange()"></select></div>
     <div class="two-col">
       <div class="fld"><label>Model</label><select id="f-model" onchange="onModelChange()"><option value="">— select —</option></select></div>
-      <div class="fld"><label>Branch / Skin</label><select id="f-branch" onchange="onBranchChange()"><option value="">— select model —</option></select></div>
+      <div class="fld" id="branch-fld"><label>Branch / Skin</label><select id="f-branch" onchange="onBranchChange()"><option value="">— select model —</option></select></div>
     </div>
     <button onclick="openAcLib()" style="width:100%;margin-top:10px;background:#0c1a2b;border:1px solid #2a4a6a;color:#4cc9f0;padding:7px 12px;border-radius:4px;cursor:pointer;font-size:11px;font-weight:700;letter-spacing:.5px;text-align:left">&#9992; Aircraft Library&hellip;</button>
   </div>
@@ -184,34 +200,9 @@ canvas{max-width:100%;max-height:calc(100vh - 120px);border:1px solid #1a3a5c;bo
 
   <div class="sec">
     <h3>Value Proposition</h3>
-    <div class="fld"><label>Mission Type</label>
+    <div class="fld"><label id="lbl-vp-mission">Mission / Operation Type</label>
       <select id="f-vp-mission" onchange="onVPMissionChange()">
-      <option value="">— select mission type —</option>
-      <optgroup label="── Manned Aviation ──────────────">
-      <option>General Reseller (Manned)</option>
-      <option>Training Command</option>
-      <option>OSA (Operational Support Airlift)</option>
-      <option>ISR</option>
-      <option>Air Transport / Airlift</option>
-      <option>Special Operations</option>
-      <option>Combat Search & Rescue (CSAR)</option>
-      <option>Aerial Refueling / Tanker</option>
-      <option>Maritime Patrol</option>
-      <option>MEDEVAC</option>
-      <option>VIP / Executive Transport</option>
-      <option>Close Air Support (CAS)</option>
-      <option>Electronic Warfare</option>
-      <option>Test & Evaluation</option>
-      <option>Attack / Strike</option>
-      <option>Logistics / Cargo</option>
-      </optgroup>
-      <optgroup label="── UAS ──────────────────────────">
-      <option>General Reseller (UAS)</option>
-      <option>UAS ISR / Reconnaissance</option>
-      <option>UAS Strike</option>
-      <option>UAS Logistics / Resupply</option>
-      <option>UAS Training</option>
-      </optgroup>
+      <option value="">— select type —</option>
       </select>
     </div>
     <div id="vp-editor-wrap" style="display:none;margin-top:4px;max-height:220px;overflow-y:auto">
@@ -243,6 +234,28 @@ Move into other solutions (Fleet Tracking/JRA/Ops Manager) after initial interes
   <div style="font-size:10px;color:#2a4a6a;letter-spacing:.8px;text-transform:uppercase;margin-top:4px">Drag to move &nbsp;·&nbsp; Corner handles to resize &nbsp;·&nbsp; Double-click to reset</div>
 </div>
 </div><!-- #main-area -->
+
+<div id="welcome-overlay">
+  <div class="wo-title">CAP Generator</div>
+  <div class="wo-sub">Choose your customer base to get started</div>
+  <div class="vert-cards">
+    <div class="vert-card" onclick="createProjectWithVertical('MA')">
+      <span class="vc-icon">✈</span>
+      <div class="vc-title">Military Aviation</div>
+      <div class="vc-sub">Squadrons, units &amp; mission types.<br>DoD EFB &amp; operations solutions.</div>
+    </div>
+    <div class="vert-card" onclick="createProjectWithVertical('CA')">
+      <span class="vc-icon">🛫</span>
+      <div class="vc-title">Commercial Aviation</div>
+      <div class="vc-sub">Part 121 airlines &amp; cargo carriers.<br>Enterprise charting &amp; dispatch.</div>
+    </div>
+    <div class="vert-card" onclick="createProjectWithVertical('BA')">
+      <span class="vc-icon">💼</span>
+      <div class="vc-title">Business Aviation</div>
+      <div class="vc-sub">Part 91 &amp; 135 operators.<br>Corporate &amp; charter solutions.</div>
+    </div>
+  </div>
+</div>
 
 <div id="ac-lib-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:9998;align-items:flex-start;justify-content:center;padding-top:60px" onclick="closeAcLib(event)">
   <div style="background:#0d1b2a;border:1px solid #2a4a6a;border-radius:8px;width:420px;max-height:80vh;display:flex;flex-direction:column;overflow:hidden" onclick="event.stopPropagation()">
@@ -363,10 +376,10 @@ Move into other solutions (Fleet Tracking/JRA/Ops Manager) after initial interes
   </div>
   <!-- Meta row -->
   <div class="pdf-meta">
-    <div class="pdf-meta-item"><span class="pdf-mlbl">Unit / Squadron</span><span id="pdf-unit" class="pdf-mval"></span></div>
-    <div class="pdf-meta-item"><span class="pdf-mlbl">Aircraft</span><span id="pdf-ac" class="pdf-mval"></span></div>
-    <div class="pdf-meta-item"><span class="pdf-mlbl">Mission</span><span id="pdf-mission" class="pdf-mval"></span></div>
-    <div class="pdf-meta-item"><span class="pdf-mlbl">Organization</span><span id="pdf-org" class="pdf-mval"></span></div>
+    <div class="pdf-meta-item"><span id="pdf-lbl-unit" class="pdf-mlbl">Unit / Squadron</span><span id="pdf-unit" class="pdf-mval"></span></div>
+    <div class="pdf-meta-item"><span id="pdf-lbl-ac" class="pdf-mlbl">Aircraft</span><span id="pdf-ac" class="pdf-mval"></span></div>
+    <div class="pdf-meta-item"><span id="pdf-lbl-mission" class="pdf-mlbl">Mission</span><span id="pdf-mission" class="pdf-mval"></span></div>
+    <div class="pdf-meta-item"><span id="pdf-lbl-org" class="pdf-mlbl">Organization</span><span id="pdf-org" class="pdf-mval"></span></div>
   </div>
   <!-- Canvas image -->
   <div class="pdf-img-wrap"><img id="pdf-canvas-img" src="" alt="Customer Action Plan"></div>
@@ -817,6 +830,218 @@ var VALUE_PROPS = {
   });
 })();
 
+// ── Commercial Aviation VALUE_PROPS ──────────────────────────────────────────
+VALUE_PROPS['Domestic Mainline'] = {
+  'FliteDeck Pro':            'Standardizes Jeppesen chart access and approach briefings across high-frequency domestic turns, keeping every crew on the same revision cycle without paper distribution delays or expired-chart MEL events.',
+  'Jeppesen Charts':          'Delivers always-current approach plates, airport diagrams, and SID/STARs via automatic AIRAC-cycle updates, eliminating paper chart costs and ensuring compliance on every domestic sector.',
+  'Jeppesen NavData':         'Keeps FMS nav databases synchronized across the fleet on the 28-day AIRAC cycle, reducing dispatch rejections from nav alerts and maintaining ATC routing compliance on trunk routes.',
+  'Onboard Performance Tool': 'Automates FAA-approved takeoff and landing performance calculations for every runway, weight, and weather combination, reducing ground time before high-frequency departures and eliminating conservative manual buffers.',
+  'TAAM':                     'Models runway congestion, gate turn times, and slot utilization at hub airports to identify bottleneck sources and support infrastructure planning discussions with airport authorities.',
+  'ForeFlight Dispatch':      'Streamlines domestic flight release with integrated weather, NOTAM, and routing tools on a single platform, reducing OCC workload across high-volume daily operations.',
+  'Jeppesen Dispatch':        'Provides enterprise-grade flight planning and dispatch with ACARS integration, fuel optimization, and regulatory compliance tools built for high-frequency mainline carrier operations.',
+  'Jeppesen Crew Briefing':   'Delivers paperless, digitally signed crew briefing packages — weather, NOTAM, OFP, charts — to mobile devices, reducing pre-departure admin and ensuring consistent briefing standards fleet-wide.',
+  'Fleet Tracking':           'Gives operations control real-time position and status visibility across the domestic fleet, enabling proactive recovery decisions before delays cascade through the hub system.',
+  'Ops Manager':              'Centralizes scheduling, crew duty tracking, and maintenance status into a single OCC view, reducing phone coordination overhead and improving on-time departure rates.',
+  'Jeppesen Runway Analysis': 'Provides certified runway analysis data for all destination airports, ensuring regulatory compliance and enabling confident dispatch decisions when field conditions or weight limits change.'
+};
+VALUE_PROPS['International Long-Haul'] = {
+  'FliteDeck Pro':            'Provides globally-current terminal charts, ETOPS alternate data, and enroute coverage with automatic revision alerts — supporting ICAO compliance across every region in the network.',
+  'Jeppesen Charts':          'Covers international approach procedures, RNAV arrivals, and airport diagrams across all ICAO regions with revision notifications aligned to local AIP amendment cycles.',
+  'Jeppesen NavData':         'Maintains synchronized FMS databases for complex oceanic, polar, and cross-ICAO routing — including RVSM routes and non-standard tracks — keeping every airframe compliant worldwide.',
+  'Onboard Performance Tool': 'Calculates certified takeoff and landing performance for international destinations with extreme altitude, temperature, or contaminated runway conditions critical for long-haul route planning.',
+  'TAAM':                     'Models new international route pairs, airspace restrictions, and overflight routing scenarios to validate feasibility and support ATC coordination before scheduling commitment.',
+  'ForeFlight Dispatch':      'Integrates SIGMET, PIREP, and international NOTAM data into a single dispatcher view, reducing the complexity of coordinating long-haul release packages across multiple ICAO regions.',
+  'Jeppesen Dispatch':        'Produces ICAO-compliant international flight plans with optimized oceanic track selection, fuel tankering analysis, and ETOPS alternate pairing for each long-haul departure.',
+  'Jeppesen Crew Briefing':   'Delivers comprehensive international briefing packages — including customs, slot, and diplomatic clearance data — to crew devices before departure, reducing long-haul turnaround admin.',
+  'Fleet Tracking':           'Maintains satellite-position tracking across intercontinental segments where radar coverage is absent, providing OCC with continuous accountability and diversion coordination capability.',
+  'Ops Manager':              'Manages international crew pairing, rest requirements across time zones, and passport/visa compliance tracking for complex long-haul crew rotations.',
+  'Jeppesen Runway Analysis': 'Provides certified performance analysis for international destination airports with challenging terrain, high-altitude fields, or regularly contaminated runways — essential for route approval.'
+};
+VALUE_PROPS['Regional / Feeder'] = {
+  'FliteDeck Pro':            'Ensures consistent chart revisions across mixed CRJ, E-Jet, and turboprop fleets operating under diverse codeshare agreements, maintaining approach currency regardless of airframe.',
+  'Jeppesen Charts':          'Keeps approach and airport charts current across high-frequency regional turns to secondary and tertiary airports where manual chart distribution creates revision gaps.',
+  'Jeppesen NavData':         'Synchronizes FMS nav databases across mixed regional fleets on the 28-day AIRAC cycle, preventing crew-reported nav alerts that delay clearances at busy feeder hubs.',
+  'Onboard Performance Tool': 'Automates takeoff performance calculations for weight-limited regional departures from short runways, enabling maximum payload dispatch without conservative manual estimate buffers.',
+  'TAAM':                     'Models feeder-to-hub connectivity and slot optimization to identify network capacity constraints before scheduling new routes or increasing frequencies.',
+  'ForeFlight Dispatch':      'Handles high-volume regional release workflows with batch weather and NOTAM processing, enabling small OCC teams to efficiently manage large route networks.',
+  'Jeppesen Dispatch':        'Scales enterprise dispatch capabilities to regional operations with efficient multi-aircraft release tools that reduce per-flight processing time for high-frequency networks.',
+  'Jeppesen Crew Briefing':   'Provides rapid digital crew briefings on quick-turn regional routes where paper distribution is impractical, ensuring crews depart with current information every sector.',
+  'Fleet Tracking':           'Tracks regional fleet positions across dispersed spoke airports, helping OCC identify disruption patterns early and coordinate hub recovery planning.',
+  'Ops Manager':              'Manages crew duty scheduling and rest requirements across complex regional pairing networks, reducing conflicts and maximizing aircraft utilization across the spoke system.',
+  'Jeppesen Runway Analysis': 'Delivers certified performance data for regional-specific airports including short fields, high-elevation destinations, and runways with seasonal contamination.'
+};
+VALUE_PROPS['Low-Cost Carrier (LCC)'] = {
+  'FliteDeck Pro':            'Replaces paper charts with a standardized digital EFB solution across the single-type fleet, cutting recurring chart costs and revision overhead on high-frequency point-to-point networks.',
+  'Jeppesen Charts':          'Delivers low per-seat chart subscription costs optimized for single-type fleets, with automatic AIRAC updates eliminating paper printing, distribution, and expired-chart compliance events.',
+  'Jeppesen NavData':         'Provides cost-effective FMS nav database management for uniform fleets with automated AIRAC delivery, reducing the operational burden of manual database tracking.',
+  'Onboard Performance Tool': 'Maximizes takeoff weight on weight-limited LCC routes with certified performance calculations that tighten payload margins without the conservative buffers that leave revenue on the table.',
+  'TAAM':                     'Supports capacity planning at congested slot-constrained airports by modeling slot utilization, gate turns, and taxi flow to identify revenue-limiting bottlenecks before schedule publication.',
+  'ForeFlight Dispatch':      'Reduces OCC staffing costs with automated weather, NOTAM, and routing workflows scaled to large route networks with small dispatcher teams.',
+  'Jeppesen Dispatch':        'Enables lean dispatch operations with automated routing, fuel optimization, and release generation tools that reduce per-flight labor cost — critical for LCC margin management.',
+  'Jeppesen Crew Briefing':   'Eliminates paper briefing printing and distribution costs with digital crew packages delivered to mobile devices before every departure.',
+  'Fleet Tracking':           'Provides real-time fleet position visibility to OCC for minimum-cost IROPS recovery through early awareness of rotational disruptions.',
+  'Ops Manager':              'Optimizes crew pairing and duty scheduling to minimize positioning cost and overtime exposure, supporting the labor cost discipline LCC unit economics require.',
+  'Jeppesen Runway Analysis': 'Provides cost-effective certified runway performance data, enabling dispatch to maximize payload on weight-limited routes without over-conservative estimates that reduce revenue per sector.'
+};
+VALUE_PROPS['Ultra-Low-Cost Carrier (ULCC)'] = {
+  'FliteDeck Pro':            'Standardizes charting across the single-type fleet at the lowest per-aircraft cost, eliminating paper chart overhead while maintaining full ICAO-compliant EFB currency.',
+  'Jeppesen Charts':          'Delivers the lowest total charting cost for ULCC fleets with scalable pricing, automatic AIRAC updates, and zero paper printing or distribution expense.',
+  'Jeppesen NavData':         'Automates 28-day FMS nav database delivery across uniform fleets, eliminating manual tracking overhead and preventing expensive last-minute nav compliance delays.',
+  'Onboard Performance Tool': 'Enables precise payload maximization on every departure with certified performance calculations, reducing instances where conservative estimates leave unsold seats against weight limits.',
+  'TAAM':                     'Identifies slot and gate utilization improvements at anchor airports to support schedule growth without proportional infrastructure cost increases.',
+  'ForeFlight Dispatch':      'Scales release workflows to large ULCC route networks with minimal dispatcher headcount through automated weather, NOTAM, and routing integration.',
+  'Jeppesen Dispatch':        'Provides enterprise dispatch at a cost-per-flight structure compatible with ULCC margin models, with automation that scales to high daily release volumes.',
+  'Jeppesen Crew Briefing':   'Replaces printed briefing packets with zero-cost digital delivery, removing a per-flight paper expense that compounds significantly across high-frequency ULCC operations.',
+  'Fleet Tracking':           'Provides OCC fleet visibility at minimum technology cost, enabling proactive IROPS management without expensive proprietary tracking infrastructure.',
+  'Ops Manager':              'Minimizes crew cost through optimized scheduling that reduces deadhead positioning, overtime, and last-minute reassignment expenses critical to ULCC unit economics.',
+  'Jeppesen Runway Analysis': 'Provides regulatory-compliant runway performance analysis at a cost structure suited to ULCC economics, ensuring dispatch can legally maximize payload on weight-limited routes.'
+};
+VALUE_PROPS['Cargo / Freighter'] = {
+  'FliteDeck Pro':            'Keeps freighter cockpits current on approach charts for irregular and ad-hoc cargo destinations, including remote airports and seasonal strips that rarely appear on mainline networks.',
+  'Jeppesen Charts':          'Covers the full range of cargo destinations worldwide — including non-IATA airports, remote strips, and charter destinations — with automatic revision updates aligned to local AIP cycles.',
+  'Jeppesen NavData':         'Maintains FMS nav database currency on irregular freighter routes where destination lists change frequently and ad-hoc routing requires up-to-date waypoint and airway data.',
+  'Onboard Performance Tool': 'Maximizes payload on weight-limited freighter departures with certified performance calculations, directly translating to additional revenue tons on every cargo sector.',
+  'TAAM':                     'Models new cargo route viability and airspace slot availability for prospective freight network expansions or seasonal charter operations.',
+  'ForeFlight Dispatch':      'Supports cargo dispatch workflows including hazmat NOTAM review and ad-hoc routing for irregular charter operations with rapidly changing schedules.',
+  'Jeppesen Dispatch':        'Provides enterprise flight planning for scheduled and charter cargo operations, integrating fuel optimization and alternate planning for a diverse and frequently-changing destination network.',
+  'Jeppesen Crew Briefing':   'Delivers digital pre-departure briefing packages to freighter crews — including special cargo and hazmat loading data — without paper printing at remote cargo terminals.',
+  'Fleet Tracking':           'Gives cargo operations control real-time visibility into freighter positions across overnight and long-haul routes, enabling proactive ground handling coordination at destination.',
+  'Ops Manager':              'Manages freighter crew scheduling across irregular operations and ad-hoc charters, maintaining duty-time compliance during high-demand seasonal peaks.',
+  'Jeppesen Runway Analysis': 'Provides certified performance analysis for cargo-specific considerations — maximum payload on contaminated or short runways — critical for profitable freighter operations at challenging fields.'
+};
+VALUE_PROPS['VIP / Charter (Part 121)'] = {
+  'FliteDeck Pro':            'Provides premium charter crews with always-current Jeppesen charts for any destination globally, ensuring first-class chart professionalism that matches the standard VIP clients expect.',
+  'Jeppesen Charts':          'Covers unusual and international VIP destinations including private strips, remote airfields, and rarely-used international alternates with automatic chart updates.',
+  'Jeppesen NavData':         'Ensures FMS databases are current for spontaneous routing changes common in VIP charter operations, where destination requests often change close to departure.',
+  'Onboard Performance Tool': 'Enables confident dispatch from weight-limited or challenging charter destinations, ensuring crews can legally and safely depart at maximum payload without conservative buffers.',
+  'TAAM':                     'Supports VIP-exclusive slot requests at constrained international airports and private terminals where availability modeling aids bid decisions and client commitments.',
+  'ForeFlight Dispatch':      'Provides rapid flight release for on-demand charter departures where clients expect minimum ground delay, integrating weather and NOTAM review for expedited clearance.',
+  'Jeppesen Dispatch':        'Enables efficient charter flight planning with flexible routing and rapid release generation for supplemental carriers operating demand-driven schedules.',
+  'Jeppesen Crew Briefing':   'Delivers polished, professional pre-departure briefing packages to crews operating premium VIP missions where presentation standards reflect the client experience.',
+  'Fleet Tracking':           'Gives charter OCC real-time visibility into positioning aircraft, enabling proactive coordination for back-to-back VIP missions with tight repositioning windows.',
+  'Ops Manager':              'Manages crew availability and scheduling for on-demand charter operations, ensuring qualified crews are matched to aircraft for every client request.',
+  'Jeppesen Runway Analysis': 'Provides certified performance analysis for VIP-requested private airstrips and international charter destinations where standard carrier performance data may not be available.'
+};
+VALUE_PROPS['Transoceanic / ETOPS'] = {
+  'FliteDeck Pro':            'Provides always-current oceanic charts, ETOPS alternate data, and North Atlantic Track waypoint coverage to ensure ICAO compliance across every transoceanic segment.',
+  'Jeppesen Charts':          'Covers NAT, PACOT, and AUSOTS oceanic track coverage with automatic revision updates, ensuring crews have accurate organized track charts for every oceanic crossing.',
+  'Jeppesen NavData':         'Maintains FMS databases with current oceanic waypoints, NAT coordinates, and ETOPS alternate routing data, preventing nav alerts that could require diversion to an unplanned alternate.',
+  'Onboard Performance Tool': 'Calculates certified performance for ETOPS-specific alternate airports — often high-altitude, short, or contaminated — ensuring dispatch can legally authorize the extended-range operation.',
+  'TAAM':                     'Models new oceanic route pairs and alternate airport availability scenarios to support ETOPS authorization paperwork and route certification with FAA/EASA.',
+  'ForeFlight Dispatch':      'Integrates SIGMET, oceanic track data, and ETOPS fuel planning into a single dispatcher view, reducing the complexity of coordinating extended transoceanic releases.',
+  'Jeppesen Dispatch':        'Produces ICAO-compliant oceanic flight plans with current NAT/PACOT track selection, fuel tankering, and ETOPS alternate analysis for every long-haul departure.',
+  'Jeppesen Crew Briefing':   'Delivers complete transoceanic briefing packages — oceanic clearance, NAT coordinates, ETOPS alternate weather, NOTAMs — to crew devices before departure.',
+  'Fleet Tracking':           'Maintains satellite-position tracking across oceanic segments where radar coverage is absent, providing OCC with continuous accountability during ETOPS operations.',
+  'Ops Manager':              'Manages the complex crew pairing and rest requirements for transoceanic extended operations, including augmented crew scheduling and international layover compliance.',
+  'Jeppesen Runway Analysis': 'Provides certified performance analysis for ETOPS alternate airports worldwide, ensuring every extended-range dispatch is supported by current runway condition and obstacle data.'
+};
+
+// ── Business Aviation VALUE_PROPS ─────────────────────────────────────────────
+VALUE_PROPS['Part 91 Owner / Operator'] = {
+  'ForeFlight Business Pro':         'Gives owner-operators a complete preflight and in-flight planning platform — current charts, weather, logbook, weight & balance — in a single iPad app that fits the pace of personal aircraft operations.',
+  'ForeFlight Business Performance': 'Provides owner-operators with accurate V-speed and runway performance calculations based on actual weight, temperature, and field conditions, replacing conservative pilot estimates with certified data.',
+  'FD Pro':                          'Delivers professional-grade flight planning with fuel optimization, ETOPS routing, and alternate analysis for owner-operators who fly complex or international itineraries on personal aircraft.',
+  'Sentry':                          'Provides ADS-B traffic and weather datalink in the cockpit for owner-operators without panel-mounted ADS-B receivers, enabling full ForeFlight situational awareness on any aircraft.',
+  'Jeppesen NavData':                'Keeps FMS or GPS nav databases current on the 28-day AIRAC cycle for privately operated aircraft, preventing nav alerts on IFR departure clearances.',
+  'Onboard Performance Tool':        'Enables owner-operators to calculate precise takeoff and landing performance for any runway and conditions, ensuring safety and regulatory compliance on every weight-critical departure.',
+  'TAAM':                            'Supports personal flight departments with airspace modeling for complex international trips or restricted airspace coordination on high-value owner itineraries.',
+  'ForeFlight Runway Analysis':      'Provides Part 91 operators with certified runway analysis reports for demanding airports — short strips, high-elevation fields, contaminated runways — ensuring every departure is backed by approved performance data.',
+  'ForeFlight Dispatch':             'Offers owner-operators and their schedulers a streamlined pre-flight release workflow integrating weather, NOTAM, and routing review for personally managed aircraft operations.',
+  'Fleet Tracking':                  'Gives personal flight department staff real-time visibility into owner-operated aircraft, supporting trip coordination and ground service provider notification.',
+  'Ops Manager':                     'Manages scheduling, maintenance coordination, and crew assignments for owner-operated aircraft, reducing administrative burden on personal flight departments.'
+};
+VALUE_PROPS['Part 91K Fractional'] = {
+  'ForeFlight Business Pro':         'Standardizes preflight planning and chart access across fractional owner devices, ensuring consistent situational awareness regardless of which shared aircraft the crew flies that day.',
+  'ForeFlight Business Performance': 'Provides fractional crews with accurate performance data across the diverse pool of shared aircraft, covering weight-and-balance and runway limits for multiple airframe types.',
+  'FD Pro':                          'Handles complex fractional trip planning — multi-leg routing with fuel stops and alternates — matched to the flexible, on-demand nature of fractional owner itineraries.',
+  'Sentry':                          'Provides ADS-B traffic and weather datalink across the fractional fleet without requiring panel modifications to every aircraft in the shared pool.',
+  'Jeppesen NavData':                'Maintains synchronized FMS nav databases across the fractional fleet pool, ensuring any shared aircraft is departure-ready regardless of which owner has requested it.',
+  'Onboard Performance Tool':        'Enables consistent performance calculations across the fractional fleet regardless of aircraft type, supporting safe dispatch for diverse owner mission profiles.',
+  'TAAM':                            'Supports fractional program planning for airspace access and route capacity modeling as operator programs expand fleet size or geographic coverage.',
+  'ForeFlight Runway Analysis':      'Provides fractional crews with certified performance data for challenging owner-requested destinations, ensuring Part 91K dispatch decisions are backed by approved runway analysis.',
+  'ForeFlight Dispatch':             'Streamlines fractional trip release with integrated pre-departure review tools matched to the fast-turn, on-demand nature of fractional owner requests.',
+  'Fleet Tracking':                  'Gives fractional program managers real-time visibility into all aircraft in the shared pool, supporting positioning decisions and owner trip scheduling across the fleet.',
+  'Ops Manager':                     'Manages the complex crew and aircraft scheduling demands of a fractional ownership program — crew availability, maintenance windows, owner demand peaks — on a single platform.'
+};
+VALUE_PROPS['Part 135 On-Demand Charter'] = {
+  'ForeFlight Business Pro':         'Equips charter crews with an all-in-one preflight platform for any on-demand destination globally, supporting rapid departure preparation when client itineraries change at short notice.',
+  'ForeFlight Business Performance': 'Provides certified performance calculations for the diverse aircraft types common in charter fleets, ensuring every on-demand departure meets Part 135 regulatory requirements.',
+  'FD Pro':                          'Delivers professional charter flight planning with fuel optimization, NBAA IFR reserve calculations, and alternate analysis for the varied destination profiles of on-demand operations.',
+  'Sentry':                          'Provides ADS-B weather and traffic datalink to charter cockpits without panel modifications, keeping ForeFlight situational awareness available on the full charter fleet.',
+  'Jeppesen NavData':                'Keeps FMS nav databases current for Part 135 charter operations where irregular destinations require accurate and current routing data for IFR clearances.',
+  'Onboard Performance Tool':        'Automates Part 135-compliant takeoff and landing performance calculations, ensuring crews meet weight and performance limitations for any client-requested destination under any conditions.',
+  'TAAM':                            'Supports charter operator planning for slot-constrained destinations and international airspace access, helping assess feasibility for unusual client itinerary requests.',
+  'ForeFlight Runway Analysis':      'Provides Part 135 operators with certified runway analysis for challenging charter destinations — private strips, international airports, contaminated runways — ensuring legal and safe dispatch authorization.',
+  'ForeFlight Dispatch':             'Enables Part 135 operators to complete weather, NOTAM, and release workflows efficiently for on-demand departures where clients expect minimum ground time.',
+  'Fleet Tracking':                  'Provides charter operators real-time aircraft position visibility for scheduling and client communication, enabling accurate ETA reporting and positioning transparency.',
+  'Ops Manager':                     'Manages charter crew scheduling, duty-time compliance, and aircraft availability for on-demand operations where last-minute requests require immediate crew and aircraft matching.'
+};
+VALUE_PROPS['Part 135 Scheduled Service'] = {
+  'ForeFlight Business Pro':         'Standardizes preflight planning across Part 135 scheduled crews operating fixed route networks, ensuring consistent chart currency and weather access on every departure.',
+  'ForeFlight Business Performance': 'Provides consistent performance calculations across the route network, supporting regulatory compliance and safe dispatch for all weight and weather combinations encountered in scheduled service.',
+  'FD Pro':                          'Delivers efficient flight planning for scheduled Part 135 routes with recurring fuel and alternate templates that reduce per-flight planning time on high-frequency city pairs.',
+  'Sentry':                          'Provides ADS-B weather and traffic datalink on scheduled Part 135 aircraft without AFMS modification requirements, extending ForeFlight capability to the full fleet.',
+  'Jeppesen NavData':                'Maintains FMS nav database currency for scheduled Part 135 operations, preventing nav-alert departure delays on time-sensitive scheduled services.',
+  'Onboard Performance Tool':        'Automates takeoff and landing performance for scheduled Part 135 operations, reducing preflight time on recurring routes while maintaining regulatory compliance across all crew assignments.',
+  'TAAM':                            'Supports route development and airspace capacity analysis for Part 135 scheduled carriers considering new route pairs or fleet expansion within their operating certificate.',
+  'ForeFlight Runway Analysis':      'Provides certified runway analysis for all Part 135 scheduled destinations, enabling dispatch to authorize departures with confidence when field conditions change seasonally.',
+  'ForeFlight Dispatch':             'Streamlines scheduled Part 135 release with batch weather and NOTAM processing tools that scale efficiently to multi-aircraft, multi-departure operations.',
+  'Fleet Tracking':                  'Gives scheduled operations control real-time fleet visibility, enabling proactive passenger notification and ground coordination for routine and irregular operations.',
+  'Ops Manager':                     'Manages crew pairing, duty scheduling, and maintenance availability for Part 135 scheduled operations — maintaining regulatory compliance while minimizing rotational inefficiency.'
+};
+VALUE_PROPS['Corporate Flight Department'] = {
+  'ForeFlight Business Pro':         'Gives corporate flight department crews a unified preflight platform for trips across the entire company network — domestic and international — with consistent chart access and weather planning.',
+  'ForeFlight Business Performance': 'Provides corporate crews with accurate V-speed and runway performance data for all aircraft in the department, ensuring every executive departure meets regulatory requirements.',
+  'FD Pro':                          'Handles complex corporate trip planning — multi-leg international routing, fuel planning, overflight permits — for executive travel where itinerary changes and last-minute requests are the norm.',
+  'Sentry':                          'Equips corporate aircraft without panel ADS-B with ForeFlight weather and traffic datalink, extending modern situational awareness to the full flight department fleet.',
+  'Jeppesen NavData':                'Keeps all corporate aircraft FMS databases on the standard 28-day update cycle, ensuring departure-ready status for any aircraft in the fleet when executive travel is requested.',
+  'Onboard Performance Tool':        'Provides corporate flight departments with certified performance calculations for all aircraft types, supporting safe executive operations at challenging domestic and international destinations.',
+  'TAAM':                            'Supports corporate aviation planning for airspace access at restricted or congested destinations, including international route analysis for executive travel to non-standard locations.',
+  'ForeFlight Runway Analysis':      'Provides certified runway performance analysis for executive-requested destinations including private strips, international airports, and high-elevation fields common in corporate aviation.',
+  'ForeFlight Dispatch':             'Streamlines corporate flight department trip release with integrated pre-departure weather, NOTAM, and filing tools that scale to small dispatcher teams serving large executive travel demand.',
+  'Fleet Tracking':                  'Gives corporate flight department coordinators real-time aircraft visibility, enabling accurate passenger ETAs and ground transportation coordination for executive arrivals.',
+  'Ops Manager':                     'Manages corporate flight department scheduling — aircraft, crew, maintenance — on a single platform that handles the complexity of multi-aircraft departments serving high-priority executive travel.'
+};
+VALUE_PROPS['High Net Worth Individual'] = {
+  'ForeFlight Business Pro':         'Gives owner-pilots and their crews an all-in-one platform for personal aviation — intuitive charts, weather, logbook, and filing — designed for sophisticated private operators who expect best-in-class tools.',
+  'ForeFlight Business Performance': 'Provides HNI owner-operators with precision performance calculations for their specific aircraft, ensuring safe departures from private strips and challenging destinations with complete professionalism.',
+  'FD Pro':                          'Delivers professional-grade flight planning for personal aircraft operations, including international routing, fuel optimization, and permit filing for complex global trips.',
+  'Sentry':                          'Provides ADS-B traffic and weather datalink for personal aircraft without ADS-B receivers, keeping the cockpit informed with ForeFlight-integrated data on every flight.',
+  'Jeppesen NavData':                'Keeps nav databases current for personal aircraft with international range, ensuring FMS currency for spontaneous routing changes common in high-net-worth travel.',
+  'Onboard Performance Tool':        'Delivers runway analysis for challenging private airstrips and destination airports, giving owner-operators and their crews data-backed confidence at demanding fields.',
+  'TAAM':                            'Supports long-range travel planning for individuals who routinely operate into restricted, congested, or unusual international destinations requiring advance airspace coordination.',
+  'ForeFlight Runway Analysis':      'Provides certified runway analysis for private airstrips, international destinations, and unusual fields HNI operators frequently visit — ensuring professional-level safety compliance.',
+  'ForeFlight Dispatch':             'Supports personal flight coordinators managing HNI travel with integrated weather, NOTAM, and pre-departure review tools that fit small personal flight operations.',
+  'Fleet Tracking':                  'Gives personal flight coordinators and security teams real-time visibility into aircraft positions, supporting travel planning and ground logistics coordination.',
+  'Ops Manager':                     'Manages crew scheduling and aircraft availability for complex multi-aircraft personal flight departments serving demanding principal travel schedules.'
+};
+VALUE_PROPS['Air Ambulance / HEMS'] = {
+  'ForeFlight Business Pro':         'Equips air ambulance crews with a reliable, current chart and weather platform that supports rapid launch decisions when minutes matter in medical transport operations.',
+  'ForeFlight Business Performance': 'Provides HEMS operators with accurate performance calculations for weight-critical medical transport missions where patient equipment weight varies and runway options are limited.',
+  'FD Pro':                          'Delivers flight planning for air ambulance routing across national and international coverage areas, with weather routing and alternate analysis for medical transport operations.',
+  'Sentry':                          'Provides ADS-B weather and traffic datalink to medical aircraft cockpits, maintaining ForeFlight situational awareness in rotorwing and fixed-wing HEMS operations.',
+  'Jeppesen NavData':                'Keeps air ambulance FMS databases current for operations at the full range of medical destination airports — including small community hospitals and remote fields.',
+  'Onboard Performance Tool':        'Calculates performance limits for medical transport departures from hospital helipads, challenging strip airports, and remote pickup locations with varying field conditions.',
+  'TAAM':                            'Supports airspace coordination planning for HEMS operators managing complex flight corridors near urban medical centers, restricted areas, and TFRs.',
+  'ForeFlight Runway Analysis':      'Provides certified performance data for HEMS destination airports including hospital helipads, remote strips, and unimproved fields common in medical transport operations.',
+  'ForeFlight Dispatch':             'Streamlines air ambulance departure coordination with rapid weather and NOTAM review adapted to the urgent, time-critical release requirements of medical transport.',
+  'Fleet Tracking':                  'Provides medical transport operations real-time fleet visibility, enabling mission coordinators to dispatch the nearest available aircraft for incoming medical requests.',
+  'Ops Manager':                     'Manages air ambulance crew availability, duty-time compliance, and aircraft readiness for 24/7 operations where crew scheduling directly affects mission response time.'
+};
+VALUE_PROPS['VIP / VVIP Transport'] = {
+  'ForeFlight Business Pro':         'Provides VIP transport crews with a professional, polished planning platform for any global destination, ensuring impeccable chart currency and planning quality matching VVIP expectations.',
+  'ForeFlight Business Performance': 'Delivers precise performance calculations for VVIP aircraft operating to private terminals, international destinations, and unusual airfields where standard performance data may not apply.',
+  'FD Pro':                          'Handles complex VVIP mission planning — spontaneous international routing, diplomatic overflight permits, fuel planning at non-IATA airports — with the reliability expected in head-of-state operations.',
+  'Sentry':                          'Provides ADS-B traffic and weather datalink to VIP aircraft without hardware modifications, maintaining ForeFlight situational awareness during sensitive transport missions.',
+  'Jeppesen NavData':                'Maintains FMS database currency for globally-capable VIP aircraft, ensuring routing flexibility for spontaneous destination changes standard in VVIP operations.',
+  'Onboard Performance Tool':        'Provides certified performance analysis for VVIP destinations including private strips, congested international airports, and remote fields where mission success depends on precise payload margins.',
+  'TAAM':                            'Supports advance mission planning for VVIP transport including airspace coordination, restricted zone analysis, and slot availability modeling at congested international gateways.',
+  'ForeFlight Runway Analysis':      'Provides certified runway analysis for the full range of VVIP destinations — private strips, head-of-state airports, and international fields — ensuring every mission departure is professionally authorized.',
+  'ForeFlight Dispatch':             'Enables VVIP mission coordinators to conduct rapid, professional pre-departure releases integrating weather, NOTAM, and diplomatic routing data for time-sensitive departures.',
+  'Fleet Tracking':                  'Gives VVIP operations coordinators and security teams real-time aircraft position tracking to support ground coordination, motorcade timing, and mission accountability.',
+  'Ops Manager':                     'Manages VVIP transport crew scheduling, security clearance tracking, and aircraft availability for missions where crew assignment precision and discretion are non-negotiable requirements.'
+};
+
 function loadCustomVPs() {
   try { var s=JSON.parse(localStorage.getItem(VP_KEY)); if(s&&typeof s==='object') return s; } catch(e) {}
   return {};
@@ -855,6 +1080,88 @@ var DEFAULT_PRODS = {
     {name:'Ops Manager',              status:'prop'},
     {name:'Jeppesen Runway Analysis', status:'prop'}
   ]
+};
+
+var DEFAULT_PRODS_CA = {
+  left: [
+    {name:'FliteDeck Pro',            status:'prop'},
+    {name:'Jeppesen Charts',          status:'prop'},
+    {name:'Jeppesen NavData',         status:'prop'},
+    {name:'Onboard Performance Tool', status:'prop'},
+    {name:'TAAM',                     status:'prop'}
+  ],
+  right: [
+    {name:'ForeFlight Dispatch',      status:'prop'},
+    {name:'Jeppesen Dispatch',        status:'prop'},
+    {name:'Jeppesen Crew Briefing',   status:'prop'},
+    {name:'Fleet Tracking',           status:'prop'},
+    {name:'Ops Manager',              status:'prop'},
+    {name:'Jeppesen Runway Analysis', status:'prop'}
+  ]
+};
+
+var DEFAULT_PRODS_BA = {
+  left: [
+    {name:'ForeFlight Business Pro',         status:'prop'},
+    {name:'ForeFlight Business Performance', status:'prop'},
+    {name:'FD Pro',                          status:'prop'},
+    {name:'Sentry',                          status:'prop'},
+    {name:'Jeppesen NavData',                status:'prop'},
+    {name:'Onboard Performance Tool',        status:'prop'},
+    {name:'TAAM',                            status:'prop'},
+    {name:'ForeFlight Runway Analysis',      status:'prop'}
+  ],
+  right: [
+    {name:'ForeFlight Dispatch', status:'prop'},
+    {name:'Fleet Tracking',      status:'prop'},
+    {name:'Ops Manager',         status:'prop'}
+  ]
+};
+
+var VERTICAL_CONFIGS = {
+  MA: {
+    name:'Military Aviation', badge:'MA', badgeClass:'vb-ma',
+    crestTitle:'Upload squadron crest / unit patch', crestLabel:'CREST',
+    unitLabel:'Unit / Squadron',         unitPlaceholder:'e.g. 160th SOAR',
+    orgLabel:'Organization',             orgPlaceholder:'e.g. United States Army Reserves',
+    acLabel:'Aircraft & Tail Count',     acPlaceholder:'e.g. C-12 ×4, KC-46 ×12',
+    missionLabel:'Mission Type',         missionPlaceholder:'e.g. OSA & Support',
+    locationLabel:'Location / Base',     locationPlaceholder:'e.g. McConnell AFB, KS',
+    showPart: false,
+    defaultProds: DEFAULT_PRODS,
+    operationGroups: [
+      { label:'── Manned Aviation ──────────────', ops:['General Reseller (Manned)','Training Command','OSA (Operational Support Airlift)','ISR','Air Transport / Airlift','Special Operations','Combat Search & Rescue (CSAR)','Aerial Refueling / Tanker','Maritime Patrol','MEDEVAC','VIP / Executive Transport','Close Air Support (CAS)','Electronic Warfare','Test & Evaluation','Attack / Strike','Logistics / Cargo'] },
+      { label:'── UAS ──────────────────────────', ops:['General Reseller (UAS)','UAS ISR / Reconnaissance','UAS Strike','UAS Logistics / Resupply','UAS Training'] }
+    ]
+  },
+  CA: {
+    name:'Commercial Aviation', badge:'CA', badgeClass:'vb-ca',
+    crestTitle:'Upload airline logo', crestLabel:'LOGO',
+    unitLabel:'Airline Name',            unitPlaceholder:'e.g. Delta Air Lines',
+    orgLabel:'ICAO / IATA Code',         orgPlaceholder:'e.g. DAL / DL',
+    acLabel:'Fleet Type',                acPlaceholder:'e.g. B737-800 ×120, A321 ×60',
+    missionLabel:'Operation Type',       missionPlaceholder:'e.g. Domestic Mainline',
+    locationLabel:'Hub / Focus City',    locationPlaceholder:'e.g. Atlanta, GA (ATL)',
+    showPart: false,
+    defaultProds: DEFAULT_PRODS_CA,
+    operationGroups: [
+      { label:'── Commercial Aviation ──────────', ops:['Domestic Mainline','International Long-Haul','Regional / Feeder','Low-Cost Carrier (LCC)','Ultra-Low-Cost Carrier (ULCC)','Cargo / Freighter','VIP / Charter (Part 121)','Transoceanic / ETOPS'] }
+    ]
+  },
+  BA: {
+    name:'Business Aviation', badge:'BA', badgeClass:'vb-ba',
+    crestTitle:'Upload company logo', crestLabel:'LOGO',
+    unitLabel:'Company / Operator',      unitPlaceholder:'e.g. Berkshire Hathaway Flight Dept.',
+    orgLabel:'ICAO / IATA Code',         orgPlaceholder:'e.g. N/A or ICAO identifier',
+    acLabel:'Aircraft Types',            acPlaceholder:'e.g. G650, G550, Citation X',
+    missionLabel:'Operation Type',       missionPlaceholder:'e.g. Part 135 On-Demand Charter',
+    locationLabel:'Home Base',           locationPlaceholder:'e.g. Teterboro, NJ (TEB)',
+    showPart: true,
+    defaultProds: DEFAULT_PRODS_BA,
+    operationGroups: [
+      { label:'── Business Aviation ────────────', ops:['Part 91 Owner / Operator','Part 91K Fractional','Part 135 On-Demand Charter','Part 135 Scheduled Service','Corporate Flight Department','High Net Worth Individual','Air Ambulance / HEMS','VIP / VVIP Transport'] }
+    ]
+  }
 };
 
 function loadProds() {
@@ -913,11 +1220,13 @@ var REGIONS = {
 // STATE
 // ─────────────────────────────────────────────────────────────────────────────
 var STATE = {
+  vertical:'MA',
   unit:    'ARAC Ft Knox',
   ac:      'BE20, C560',
   mission: 'OSA & Support',
   org:     'United States Army Reserves',
   location:'',
+  part:    '',
   region:  '',
   model:   '',
   branch:  '',
@@ -2573,8 +2882,10 @@ function _genId() { return 'p' + Date.now() + Math.random().toString(36).slice(2
 
 function captureProjectState() {
   return {
+    vertical: STATE.vertical||'MA',
     unit: STATE.unit, ac: STATE.ac, mission: STATE.mission,
-    org: STATE.org, location: STATE.location, region: STATE.region,
+    org: STATE.org, location: STATE.location, part: STATE.part||'',
+    region: STATE.region,
     model: STATE.model, branch: STATE.branch, missionVP: STATE.missionVP,
     proposal: STATE.proposal, acOffX: STATE.acOffX, acOffY: STATE.acOffY,
     acScale: STATE.acScale,
@@ -2590,8 +2901,10 @@ function captureProjectState() {
 
 function applyProjectState(snap) {
   if (!snap) return;
+  STATE.vertical= snap.vertical||'MA';
   STATE.unit=snap.unit||''; STATE.ac=snap.ac||''; STATE.mission=snap.mission||'';
-  STATE.org=snap.org||''; STATE.location=snap.location||''; STATE.region=snap.region||'';
+  STATE.org=snap.org||''; STATE.location=snap.location||''; STATE.part=snap.part||'';
+  STATE.region=snap.region||'';
   STATE.model=snap.model||''; STATE.branch=snap.branch||''; STATE.missionVP=snap.missionVP||'';
   STATE.proposal=snap.proposal||''; STATE.acOffX=snap.acOffX||0; STATE.acOffY=snap.acOffY||0;
   STATE.acScale=snap.acScale||1.0;
@@ -2599,10 +2912,13 @@ function applyProjectState(snap) {
   STATE.ddSel   = snap.ddSel   || [];
   STATE.ddCustom= snap.ddCustom|| [];
 
+  applyVerticalUI(STATE.vertical);
+
   function fv(id,v){ var el=document.getElementById(id); if(el) el.value=v||''; }
   fv('f-unit',    STATE.unit);    fv('f-ac',      STATE.ac);
   fv('f-mission', STATE.mission); fv('f-org',     STATE.org);
   fv('f-location',STATE.location);fv('f-proposal',STATE.proposal);
+  fv('f-part',    STATE.part);
   fv('f-vp-mission', STATE.missionVP);
 
   // Region/model/branch cascades
@@ -2645,19 +2961,94 @@ function debouncedProjectSave() {
 
 function newProject() {
   saveCurrentProject();
-  var id = _genId();
+  showWelcomeScreen();
+}
+
+function showWelcomeScreen() {
+  var el = document.getElementById('welcome-overlay');
+  if (el) el.classList.add('visible');
+}
+
+function createProjectWithVertical(v) {
+  var el = document.getElementById('welcome-overlay');
+  if (el) el.classList.remove('visible');
+  var cfg = VERTICAL_CONFIGS[v] || VERTICAL_CONFIGS.MA;
+  var dp  = cfg.defaultProds;
+  var id  = _genId();
   PROJECTS.list.push({ id:id, name:'New CAP', created:Date.now(), modified:Date.now(),
-    state:{ unit:'',ac:'',mission:'',org:'',location:'',region:'',model:'',branch:'',
-            missionVP:'',proposal:'',acOffX:0,acOffY:0,acScale:1.0,
-            prods:{left:DEFAULT_PRODS.left.map(function(p){return {name:p.name,status:p.status};}),
-                   right:DEFAULT_PRODS.right.map(function(p){return {name:p.name,status:p.status};})},
-            ddSel:[],ddCustom:[],
-            crest:null,seName:'',customers:'',customVPs:{} }
+    state:{ vertical:v, unit:'',ac:'',mission:'',org:'',location:'',part:'',
+            region:'',model:'',branch:'',missionVP:'',proposal:'',
+            acOffX:0,acOffY:0,acScale:1.0,
+            prods:{left:dp.left.map(function(p){return {name:p.name,status:p.status};}),
+                   right:dp.right.map(function(p){return {name:p.name,status:p.status};})},
+            ddSel:[],ddCustom:[],crest:null,seName:'',customers:'',customVPs:{} }
   });
   PROJECTS.activeId = id;
   _saveProjectsData();
   applyProjectState(_activeProject().state);
   renderTabs();
+}
+
+function applyVerticalUI(v) {
+  var cfg = VERTICAL_CONFIGS[v] || VERTICAL_CONFIGS.MA;
+  // App title badge
+  var titleEl = document.getElementById('app-title');
+  if (titleEl) titleEl.innerHTML = 'CAP Generator <span class="vert-badge '+cfg.badgeClass+'">'+cfg.badge+'</span>';
+  // Form labels
+  function setLbl(id, txt) { var el=document.getElementById(id); if(el) el.textContent=txt; }
+  setLbl('lbl-unit',     cfg.unitLabel);
+  setLbl('lbl-org',      cfg.orgLabel);
+  setLbl('lbl-ac',       cfg.acLabel);
+  setLbl('lbl-mission',  cfg.missionLabel);
+  setLbl('lbl-location', cfg.locationLabel);
+  // Placeholders
+  function setPH(id, txt) { var el=document.getElementById(id); if(el) el.placeholder=txt; }
+  setPH('f-unit',     cfg.unitPlaceholder);
+  setPH('f-org',      cfg.orgPlaceholder);
+  setPH('f-ac',       cfg.acPlaceholder);
+  setPH('f-mission',  cfg.missionPlaceholder);
+  setPH('f-location', cfg.locationPlaceholder);
+  // Crest/logo label in HTML panel
+  var crestPh = document.getElementById('crest-ph-lbl');
+  if (crestPh) crestPh.textContent = cfg.crestLabel;
+  var crestWrap = document.getElementById('crest-wrap');
+  if (crestWrap) crestWrap.title = cfg.crestTitle;
+  // Part field (BA only)
+  var partFld = document.getElementById('part-fld');
+  if (partFld) partFld.style.display = cfg.showPart ? '' : 'none';
+  // Branch/Skin (MA only)
+  var branchFld = document.getElementById('branch-fld');
+  if (branchFld) branchFld.style.display = v === 'MA' ? '' : 'none';
+  // Section header
+  setLbl('sec-h3-unitinfo', v === 'MA' ? 'Unit Info' : 'Customer Info');
+  // PDF meta labels
+  setLbl('pdf-lbl-unit',    cfg.unitLabel);
+  setLbl('pdf-lbl-ac',      cfg.acLabel);
+  setLbl('pdf-lbl-mission', cfg.missionLabel);
+  setLbl('pdf-lbl-org',     cfg.orgLabel);
+  // Rebuild VP mission select
+  rebuildVPMissionSelect(v);
+}
+
+function rebuildVPMissionSelect(v) {
+  var cfg = VERTICAL_CONFIGS[v] || VERTICAL_CONFIGS.MA;
+  var sel = document.getElementById('f-vp-mission');
+  if (!sel) return;
+  var cur = sel.value;
+  sel.innerHTML = '<option value="">— select type —</option>';
+  cfg.operationGroups.forEach(function(grp) {
+    var og = document.createElement('optgroup');
+    og.label = grp.label;
+    grp.ops.forEach(function(op) {
+      var o = document.createElement('option');
+      o.value = op; o.textContent = op;
+      og.appendChild(o);
+    });
+    sel.appendChild(og);
+  });
+  // Restore previous selection if still valid
+  sel.value = cur;
+  if (!sel.value) sel.value = '';
 }
 
 function switchProject(id) {
@@ -2670,10 +3061,15 @@ function switchProject(id) {
 }
 
 function deleteProject(id) {
-  if(PROJECTS.list.length<=1){ alert('Cannot close the last project.'); return; }
   var idx=PROJECTS.list.findIndex(function(p){ return p.id===id; });
   if(idx<0) return;
   PROJECTS.list.splice(idx,1);
+  if(PROJECTS.list.length===0){
+    PROJECTS.activeId=null;
+    _saveProjectsData(); renderTabs();
+    showWelcomeScreen();
+    return;
+  }
   if(PROJECTS.activeId===id){
     PROJECTS.activeId=PROJECTS.list[Math.max(0,idx-1)].id;
     var p=_activeProject(); if(p) applyProjectState(p.state);
@@ -2732,14 +3128,12 @@ function renderTabs() {
 function initProjects() {
   _loadProjectsData();
   if(PROJECTS.list.length===0){
-    var id=_genId();
-    PROJECTS.list=[{ id:id, name:STATE.unit||'ARAC Ft Knox',
-      created:Date.now(), modified:Date.now(), state:captureProjectState() }];
-    PROJECTS.activeId=id; _saveProjectsData();
+    renderTabs();
+    showWelcomeScreen();
   } else {
     var p=_activeProject(); if(p) applyProjectState(p.state);
+    renderTabs();
   }
-  renderTabs();
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -2790,6 +3184,7 @@ loadCrestFromStorage();
 try { var _sn=localStorage.getItem('cap_se_v1');   if(_sn) document.getElementById('f-se-name').value=_sn;   } catch(e){}
 try { var _cu=localStorage.getItem('cap_cust_v1'); if(_cu) document.getElementById('f-customers').value=_cu; } catch(e){}
 try { var _loc=localStorage.getItem('cap_loc_v1'); if(_loc){ STATE.location=_loc; document.getElementById('f-location').value=_loc; } } catch(e){}
+applyVerticalUI('MA');
 // Init project system last so it can capture a clean state snapshot on first run
 initProjects();
 initCollapsibles();

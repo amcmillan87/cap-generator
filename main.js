@@ -8,7 +8,8 @@ function checkForUpdates(win, silent) {
   const options = {
     hostname: 'api.github.com',
     path: `/repos/${GITHUB_OWNER}/${GITHUB_REPO}/releases/latest`,
-    headers: { 'User-Agent': 'CAP-Generator-' + app.getVersion() }
+    headers: { 'User-Agent': 'CAP-Generator-' + app.getVersion() },
+    rejectUnauthorized: false  // bypass corporate SSL inspection proxy
   }
   https.get(options, (res) => {
     let data = ''

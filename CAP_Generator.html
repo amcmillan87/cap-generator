@@ -1243,13 +1243,45 @@ var STATE = {
 // ─────────────────────────────────────────────────────────────────────────────
 // DUE DILIGENCE DATA
 // ─────────────────────────────────────────────────────────────────────────────
-var DD_PRODS = {
+var DD_PRODS_MA = {
   'EFB / Flight Planning': ['JMPS','Aero App','OnPoint','FltPlan.com','Garmin Pilot','iFlightPlanner','Runway Ready','Paper Charts / Printed'],
   'Scheduling': ['PEX (Patriot Excalibur)','GTIMS','ARMS','SharePoint / Manual','Digital Ops','SKED','Excel / Manual'],
   'Navigation Data': ['DAFIF','NGA Charts','Garmin Databases','Jeppesen NavData (Civil)'],
   'Ops / Maintenance': ['ALIS / ODIN','MAF','IMDS','GCSS-Army','MX Spreadsheets'],
   'ForeFlight / Jeppesen': ['ForeFlight MFB One','Jeppesen Charting (Mil)','ForeFlight Dispatch','Jeppesen NavData','Fleet Tracking','Ops Manager','FD Pro','JRA / Runway Analysis']
 };
+
+var DD_PRODS_CA = {
+  'EFB / Charts': ['Lido mBriefing (Lufthansa Systems)','Navtech Charts','Airbus Flysmart+','Boeing EFB','Paper Jeppesen Charts','Paper Charts / Printed'],
+  'Navigation Data': ['Lufthansa Systems NavData','Navtech NavData','EAG (European Avionics)','Proprietary / In-House'],
+  'Flight Planning / Dispatch': ['SITA WorldFlight','Lido Flight 4D','Sabre AirCentre Flight','Navtech Dispatch','IBS OPSi','RocketRoute'],
+  'Crew Briefing': ['Comply365','DocuSystems','Airline Apps','Paper Briefing Packages','Manual / Email Distribution'],
+  'Performance (OPT)': ['Navtech OPT','Airbus Flysmart+ Perf','SITA Performance','Manual Charts / AFM'],
+  'Runway Analysis': ['Navtech Runway Analysis','SITA Runway Analysis','Scandinavian Avionics','Manual AFM Data'],
+  'Ops / Scheduling': ['AIMS','Sabre AirCentre Crew','IBS iFlight','Ultramain','AMOS (Swiss-AS)','Excel / Manual'],
+  'Fleet Tracking': ['SITA AircraftTracking','Rockwell Collins ARINC','FlightAware','FlightRadar24 Business','ACARS-based'],
+  'ForeFlight / Jeppesen': ['FliteDeck Pro','Jeppesen Charts','Jeppesen NavData','ForeFlight Dispatch','Jeppesen Dispatch','Jeppesen Crew Briefing','Fleet Tracking','Ops Manager','Onboard Performance Tool','TAAM','Jeppesen Runway Analysis']
+};
+
+var DD_PRODS_BA = {
+  'EFB / Charts': ['Garmin Pilot','FltPlan Go','WingX Pro','CloudAhoy','Avidyne','Paper Charts / Printed'],
+  'Navigation Data': ['Garmin Databases','Jeppesen NavData (Legacy)','Bendix/King Databases','Paper NOS Charts'],
+  'Flight Planning': ['Garmin Pilot','RocketRoute','Universal Weather','ARINCDirect','MyFlightRoute'],
+  'Weather / ADS-B': ['Garmin GDL 50/52','Stratus (Sporty\'s)','iLevil','Panel ADS-B Receiver','Bad Elf'],
+  'Performance': ['APG (Navtech)','Garmin Pilot Perf','Shadin Avionics','Manual AFM Calculations'],
+  'Runway Analysis': ['APG (Aircraft Performance Group)','Navtech Runway Analysis','Manual AFM Data'],
+  'Trip Support / Dispatch': ['Universal Weather & Aviation','ARINCDirect','Jetex','World Fuel Connect','Manual / Email'],
+  'Fleet Tracking / Ops': ['Spidertracks','FlightAware','Leon Software','Flightdocs','Google Sheets / Excel'],
+  'ForeFlight / Jeppesen': ['ForeFlight Business Pro','ForeFlight Business Performance','FD Pro','Sentry','Jeppesen NavData','Onboard Performance Tool','ForeFlight Runway Analysis','ForeFlight Dispatch','Fleet Tracking','Ops Manager','TAAM']
+};
+
+var DD_PRODS = DD_PRODS_MA; // default; renderDDForm() reads STATE.vertical at call time
+
+function getActiveDDProds() {
+  if (STATE.vertical === 'CA') return DD_PRODS_CA;
+  if (STATE.vertical === 'BA') return DD_PRODS_BA;
+  return DD_PRODS_MA;
+}
 
 function loadDDState() {
   try {
@@ -1265,10 +1297,11 @@ function saveDDState() {
 function renderDDForm() {
   var el = document.getElementById('dd-form'); if (!el) return;
   el.innerHTML = '';
-  var allCats = Object.keys(DD_PRODS);
+  var activeDD = getActiveDDProds();
+  var allCats = Object.keys(activeDD);
   if (STATE.ddCustom.length) allCats = allCats.concat(['Custom']);
   allCats.forEach(function(cat) {
-    var items = cat === 'Custom' ? STATE.ddCustom : DD_PRODS[cat];
+    var items = cat === 'Custom' ? STATE.ddCustom : activeDD[cat];
     if (!items || !items.length) return;
     var catEl = document.createElement('div');
     catEl.className = 'dd-cat'; catEl.textContent = cat; el.appendChild(catEl);

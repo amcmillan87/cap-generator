@@ -79,6 +79,8 @@ canvas{max-width:100%;max-height:calc(100vh - 120px);border:1px solid #1a3a5c;bo
 #export-btn:hover{opacity:.9}
 #pdf-btn{padding:11px 30px;background:linear-gradient(135deg,#0f5030,#1a9a48);border:none;border-radius:6px;color:#fff;font-size:12px;font-weight:800;cursor:pointer;letter-spacing:2px;text-transform:uppercase;box-shadow:0 2px 12px rgba(26,154,72,.35)}
 #pdf-btn:hover{opacity:.9}
+#present-btn{padding:11px 30px;background:linear-gradient(135deg,#a5480f,#f0791a);border:none;border-radius:6px;color:#fff;font-size:12px;font-weight:800;cursor:pointer;letter-spacing:2px;text-transform:uppercase;box-shadow:0 2px 12px rgba(240,121,26,.35)}
+#present-btn:hover{opacity:.9}
 /* PDF page layout */
 #pdf-page{display:none;background:#fff;color:#111;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif}
 .pdf-hdr{background:#0d1b2a;display:flex;align-items:center;gap:14px;padding:14px 22px}
@@ -133,6 +135,33 @@ canvas{max-width:100%;max-height:calc(100vh - 120px);border:1px solid #1a3a5c;bo
 .vb-ma{background:#0f2040;color:#4cc9f0;border:1px solid #1e4080}
 .vb-ca{background:#0f2a18;color:#48d46a;border:1px solid #1e5030}
 .vb-ba{background:#2a1808;color:#f0a050;border:1px solid #5a3010}
+/* ── Presentation screenshot modal ─────────────── */
+#present-modal{position:fixed;inset:0;background:rgba(0,0,0,.72);z-index:9998;display:none;align-items:flex-start;justify-content:center;padding:48px 20px}
+#present-modal.open{display:flex}
+.pm-box{background:#0d1b2a;border:1px solid #2a4a6a;border-radius:10px;width:640px;max-width:100%;max-height:calc(100vh - 96px);display:flex;flex-direction:column;overflow:hidden}
+.pm-head{display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid #1a3050;flex-shrink:0}
+.pm-head h3{font-size:13px;font-weight:800;color:#f0791a;text-transform:uppercase;letter-spacing:1px;margin:0;border:none;padding:0}
+.pm-head .pm-x{background:none;border:none;color:#6a8fae;font-size:22px;cursor:pointer;line-height:1;padding:0 2px}
+.pm-sub{font-size:11px;color:#6a8fae;padding:10px 20px 0;line-height:1.5}
+.pm-list{overflow-y:auto;padding:12px 20px;flex:1}
+.pm-row{display:flex;align-items:center;gap:12px;padding:11px 0;border-bottom:1px solid #16283c}
+.pm-row:last-child{border-bottom:none}
+.pm-row.noshot{opacity:.62}
+.pm-name{flex:1;font-size:13px;font-weight:700;color:#e8f0fa;min-width:0}
+.pm-thumb{width:64px;height:40px;border-radius:4px;border:1px solid #2a4a6a;object-fit:cover;background:#060d1a;flex-shrink:0;display:none}
+.pm-thumb.show{display:block}
+.pm-upload{background:#0c1a2b;border:1px solid #2a4a6a;color:#4cc9f0;padding:6px 12px;border-radius:5px;cursor:pointer;font-size:11px;font-weight:700;white-space:nowrap;flex-shrink:0}
+.pm-upload:hover{background:#0f2a45}
+.pm-upload.has{border-color:#1a9a48;color:#3ad46a}
+.pm-noshot{display:flex;align-items:center;gap:5px;font-size:11px;color:#9fb3c6;cursor:pointer;user-select:none;white-space:nowrap;flex-shrink:0}
+.pm-noshot input{accent-color:#f0791a;width:13px;height:13px;cursor:pointer}
+.pm-foot{display:flex;gap:10px;justify-content:flex-end;align-items:center;padding:14px 20px;border-top:1px solid #1a3050;flex-shrink:0}
+.pm-allnone{margin-right:auto;font-size:11px;color:#6a8fae;cursor:pointer;user-select:none;display:flex;align-items:center;gap:5px}
+.pm-allnone input{accent-color:#f0791a;width:13px;height:13px;cursor:pointer}
+.pm-cancel{background:none;border:1px solid #2a4a6a;color:#9fb3c6;padding:9px 18px;border-radius:6px;cursor:pointer;font-size:12px;font-weight:700}
+.pm-cancel:hover{color:#fff;border-color:#4a6a8a}
+.pm-go{background:linear-gradient(135deg,#a5480f,#f0791a);border:none;color:#fff;padding:9px 22px;border-radius:6px;cursor:pointer;font-size:12px;font-weight:800;letter-spacing:.5px}
+.pm-go:hover{opacity:.9}
 </style>
 </head>
 <body>
@@ -230,6 +259,7 @@ Move into other solutions (Fleet Tracking/JRA/Ops Manager) after initial interes
   <div style="display:flex;gap:10px;align-items:center">
     <button id="export-btn" onclick="exportCAP()">Export PNG</button>
     <button id="pdf-btn" onclick="exportPDF()">Export PDF</button>
+    <button id="present-btn" onclick="openPresentModal()">Generate Presentation</button>
   </div>
   <div style="font-size:10px;color:#2a4a6a;letter-spacing:.8px;text-transform:uppercase;margin-top:4px">Drag to move &nbsp;·&nbsp; Corner handles to resize &nbsp;·&nbsp; Double-click to reset</div>
 </div>
@@ -253,6 +283,22 @@ Move into other solutions (Fleet Tracking/JRA/Ops Manager) after initial interes
       <span class="vc-icon">💼</span>
       <div class="vc-title">Business Aviation</div>
       <div class="vc-sub">Part 91 &amp; 135 operators.<br>Corporate &amp; charter solutions.</div>
+    </div>
+  </div>
+</div>
+
+<div id="present-modal">
+  <div class="pm-box">
+    <div class="pm-head">
+      <h3>Generate Presentation</h3>
+      <button class="pm-x" onclick="closePresentModal()">&times;</button>
+    </div>
+    <div class="pm-sub">Add a screenshot for each proposed solution, or mark it <b>No screenshot</b> to show that slide as full-width text. You can also skip a product entirely — it will use a placeholder.</div>
+    <div class="pm-list" id="pm-list"></div>
+    <div class="pm-foot">
+      <label class="pm-allnone"><input type="checkbox" id="pm-all-none" onchange="toggleAllNoShot(this.checked)">No screenshots (all full-width)</label>
+      <button class="pm-cancel" onclick="closePresentModal()">Cancel</button>
+      <button class="pm-go" onclick="confirmGeneratePresentation()">Generate &amp; Download</button>
     </div>
   </div>
 </div>
@@ -611,30 +657,30 @@ var VALUE_PROPS = {
 
   // ── General Reseller ──────────────────────────────────────────────────────
   "General Reseller (Manned)": {
-    "Jeppesen Military Charting Service": "A single, standardized chart solution covering civil and military airspace worldwide — an easy entry point for any reseller because every manned military operator has a chart requirement, making it a high-probability first conversation regardless of platform or mission type.",
+    "Jeppesen Military Charting Service": "A single, standardized chart solution covering civil and military airspace worldwide, an easy entry point for any reseller because every manned military operator has a chart requirement, making it a high-probability first conversation regardless of platform or mission type.",
     "ForeFlight MFB One": "The most widely adopted military EFB platform on the market, giving resellers a flagship product with proven adoption that addresses the most universal pain point in military aviation: reducing crew workload from pre-flight planning through in-flight execution.",
-    "NavData": "Navigation database currency is a non-discretionary compliance requirement for every airframe in every fleet — creating a predictable, recurring revenue stream for resellers while eliminating a persistent readiness risk for the customer's maintenance and operations teams.",
+    "NavData": "Navigation database currency is a non-discretionary compliance requirement for every airframe in every fleet, creating a predictable, recurring revenue stream for resellers while eliminating a persistent readiness risk for the customer's maintenance and operations teams.",
     "FD Pro": "Automates flight documents, weight-and-balance, and departure analysis for any aircraft type, giving resellers a high-value add-on that delivers an immediate, visible reduction in the administrative overhead every operations office manages daily.",
     "FliteDeck Advisor": "Standardizes regulatory compliance checking across mixed fleets, giving resellers a risk-reduction narrative that resonates with any unit facing increased scrutiny on airspace coordination, documentation accuracy, and departure compliance.",
-    "Mil Dispatch/Planning": "Compresses mission planning time from hours to minutes for any manned operator, providing resellers with a measurable efficiency gain that stands out in any customer conversation — regardless of the unit's primary mission or aircraft type.",
+    "Mil Dispatch/Planning": "Compresses mission planning time from hours to minutes for any manned operator, providing resellers with a measurable efficiency gain that stands out in any customer conversation, regardless of the unit's primary mission or aircraft type.",
     "ForeFlight Dispatch": "Scales from small unit ops offices to wing-level operations centers, giving resellers a platform that grows with the customer and creates long-term account stickiness through deep integration into daily flight operations workflows.",
-    "Fleet Tracking": "Real-time aircraft positioning is a capability every commander wants and few units have in a single interface — giving resellers a straightforward value story around operational visibility, accountability, and response time that translates across all customer types.",
-    "Jeppesen Runway Analysis": "Certified takeoff and landing performance data is a safety-of-flight requirement that no operator can defer — providing resellers with a must-have product that creates urgency in the sales conversation and supports margin without heavy discounting.",
+    "Fleet Tracking": "Real-time aircraft positioning is a capability every commander wants and few units have in a single interface, giving resellers a straightforward value story around operational visibility, accountability, and response time that translates across all customer types.",
+    "Jeppesen Runway Analysis": "Certified takeoff and landing performance data is a safety-of-flight requirement that no operator can defer, providing resellers with a must-have product that creates urgency in the sales conversation and supports margin without heavy discounting.",
     "Ops Manager": "Centralizes scheduling, crew qualification tracking, and maintenance status for any manned aviation unit, giving resellers an operations efficiency platform that addresses universal pain points and creates entry into fleet-wide conversations beyond the initial point of contact.",
   },
 
   // ── UAS Mission Types ──────────────────────────────────────────────────────
   "General Reseller (UAS)": {
-    "Jeppesen Military Charting Service": "Certified airspace data for BVLOS corridor planning and ATC coordination is the foundational requirement for any organization operating unmanned aircraft beyond visual line of sight — giving resellers a natural entry-point product for every UAS customer conversation.",
+    "Jeppesen Military Charting Service": "Certified airspace data for BVLOS corridor planning and ATC coordination is the foundational requirement for any organization operating unmanned aircraft beyond visual line of sight, giving resellers a natural entry-point product for every UAS customer conversation.",
     "ForeFlight MFB One": "Bridges the gap between traditional aviation planning tools and the UAS operating environment, giving resellers a platform with proven manned aviation credibility that GCS operators and their chain of command already recognize and trust.",
-    "NavData": "BVLOS operations in controlled airspace require current navigation databases just as manned platforms do — creating a recurring compliance-driven revenue stream for resellers while removing a readiness risk that UAS program managers are often slow to anticipate until it causes a grounding.",
-    "FD Pro": "Pre-mission documentation requirements for UAS operations are growing as regulatory oversight increases — giving resellers an early-mover advantage by offering a product that automates compliance paperwork before customers realize how much time their GCS crews are losing to manual processes.",
-    "FliteDeck Advisor": "Automated airspace and NOTAM conflict checking before UAS launch reduces the risk of costly airspace violations that can ground a program and damage a unit's relationship with ATC — a risk-reduction story that resonates immediately with program managers and safety officers.",
+    "NavData": "BVLOS operations in controlled airspace require current navigation databases just as manned platforms do, creating a recurring compliance-driven revenue stream for resellers while removing a readiness risk that UAS program managers are often slow to anticipate until it causes a grounding.",
+    "FD Pro": "Pre-mission documentation requirements for UAS operations are growing as regulatory oversight increases, giving resellers an early-mover advantage by offering a product that automates compliance paperwork before customers realize how much time their GCS crews are losing to manual processes.",
+    "FliteDeck Advisor": "Automated airspace and NOTAM conflict checking before UAS launch reduces the risk of costly airspace violations that can ground a program and damage a unit's relationship with ATC, a risk-reduction story that resonates immediately with program managers and safety officers.",
     "Mil Dispatch/Planning": "Compresses BVLOS coordination and launch planning timelines for any UAS mission profile, giving resellers a tangible efficiency gain that stands out in customer conversations where operators are struggling to scale sortie rates as their unmanned fleet grows.",
-    "ForeFlight Dispatch": "Provides operations centers with real-time UAS situational awareness and the ability to update GCS crews during active missions — addressing a command and control gap that almost every UAS unit identifies as a top operational priority.",
+    "ForeFlight Dispatch": "Provides operations centers with real-time UAS situational awareness and the ability to update GCS crews during active missions, addressing a command and control gap that almost every UAS unit identifies as a top operational priority.",
     "Fleet Tracking": "A common operating picture for the UAS fleet is the single most requested capability by commanders managing multiple unmanned assets, giving resellers a high-demand product with a short path from first conversation to purchase decision.",
-    "Jeppesen Runway Analysis": "Fixed-wing UAS performance planning is routinely overlooked during initial fleet standup — giving resellers an opportunity to deliver genuine safety value by introducing a product that prevents weight-limit exceedances and departure incidents at austere forward airfields.",
-    "Ops Manager": "Centralizes GCS operator currency, airframe maintenance, and mission scheduling for any UAS organization — giving resellers a scalable operations management platform that creates enterprise-level account relationships as the customer's unmanned fleet expands.",
+    "Jeppesen Runway Analysis": "Fixed-wing UAS performance planning is routinely overlooked during initial fleet standup, giving resellers an opportunity to deliver genuine safety value by introducing a product that prevents weight-limit exceedances and departure incidents at austere forward airfields.",
+    "Ops Manager": "Centralizes GCS operator currency, airframe maintenance, and mission scheduling for any UAS organization, giving resellers a scalable operations management platform that creates enterprise-level account relationships as the customer's unmanned fleet expands.",
   },
 
   "UAS ISR / Reconnaissance": {
@@ -682,7 +728,7 @@ var VALUE_PROPS = {
     "NavData": "Provides current navigation data for training UAS platforms, ensuring student operators develop procedural habits and currency-maintenance disciplines that transfer directly to the operational aircraft they will fly in their first assignment.",
     "FD Pro": "Produces standardized training documentation for student GCS operator sorties, tracking syllabus completion and reducing administrative burden on training squadron operations staff managing multiple student cohorts simultaneously.",
     "FliteDeck Advisor": "Teaches student GCS operators to integrate automated compliance checks into their pre-launch workflow, establishing verification habits and standards before they arrive at operational units with real-world consequences.",
-    "Mil Dispatch/Planning": "Exposes student operators to the full UAS mission planning process — from BVLOS corridor filing to ATC coordination — in a supervised environment before they are responsible for operational mission execution.",
+    "Mil Dispatch/Planning": "Exposes student operators to the full UAS mission planning process (from BVLOS corridor filing to ATC coordination) in a supervised environment before they are responsible for operational mission execution.",
     "ForeFlight Dispatch": "Enables instructor oversight of student-generated UAS flight plans, enforcing planning standards and catching airspace errors before they affect training sorties or require last-minute ATC coordination.",
     "Fleet Tracking": "Provides UAS training squadron supervisors with real-time visibility into all student solo missions, enabling rapid instructor intervention if a trainee deviates from the approved operating area or encounters an unexpected situation.",
     "Jeppesen Runway Analysis": "Introduces student GCS operators to UAS performance planning across the range of payload, temperature, and field elevation conditions they will encounter at operational billets, building a foundation for sound departure and recovery planning.",
@@ -701,69 +747,69 @@ var VALUE_PROPS = {
   // New product VPs keyed by mission type
   var NEW_VPS = {
     'MFB Pro': {
-      'Training Command':             'Full-featured military EFB with advanced multi-aircraft admin controls and instructor monitoring — gives training commands a single platform to manage every student and instructor device from one dashboard, eliminating the per-aircraft configuration overhead that drives up support costs in high-volume training environments.',
-      'OSA (Operational Support Airlift)': 'Delivers the complete OSA crew workflow — weather, NOTAMs, routing, fuel, and documents — in one tablet, plus enterprise admin tools that give ops officers fleet-wide visibility and real-time plan updates without radio coordination.',
+      'Training Command':             'Full-featured military EFB with advanced multi-aircraft admin controls and instructor monitoring, gives training commands a single platform to manage every student and instructor device from one dashboard, eliminating the per-aircraft configuration overhead that drives up support costs in high-volume training environments.',
+      'OSA (Operational Support Airlift)': 'Delivers the complete OSA crew workflow (weather, NOTAMs, routing, fuel, and documents) in one tablet, plus enterprise admin tools that give ops officers fleet-wide visibility and real-time plan updates without radio coordination.',
       'ISR':                          'Provides ISR crews advanced mission-planning overlays with persistent sensor coverage analysis and route deconfliction tools, while giving ops center admins centralized plan review and real-time in-flight update capability across the entire ISR fleet.',
-      'Air Transport / Airlift':      'Scales from single-ship airlift to wing-level fleet management with centralized admin, bulk database pushes, and real-time crew communication — replacing fragmented planning tools with one platform across all airframe types.',
+      'Air Transport / Airlift':      'Scales from single-ship airlift to wing-level fleet management with centralized admin, bulk database pushes, and real-time crew communication, replacing fragmented planning tools with one platform across all airframe types.',
       'Special Operations':           'Purpose-built for SOF planning cycles with advanced TFR and threat overlay management, rapid re-plan tools, and secure fleet admin controls that match the compressed timeline demands of time-sensitive special operations.',
       'Combat Search & Rescue (CSAR)':'Gives CSAR flight leads the fastest pre-launch planning interface available while ops center admins retain real-time fleet-wide situational awareness, enabling dynamic rescue coordination across multiple assets from a single dashboard.',
       'Aerial Refueling / Tanker':    'Advanced AR track planning, receiver scheduling integration, and enterprise fleet admin give tanker units a centralized platform for managing large-scale refueling operations without the coordination overhead of disconnected planning tools.',
       'Maritime Patrol':              'Integrates ocean weather, NOTAMs, and NOTMAR into advanced maritime planning overlays while providing fleet administrators centralized management of multi-crew long-duration patrol operations.',
       'MEDEVAC':                      'Fastest casualty routing and facility analysis on the market, with enterprise admin controls that let MEDEVAC ops centers monitor all airborne assets and push updated destination changes in real time during active patient transport chains.',
-      'VIP / Executive Transport':    'Delivers the polished, precision planning standard expected for senior official travel, with centralized admin ensuring every crew has the same current data — and ops staff can monitor and update missions without breaking the crew\'s workflow.',
+      'VIP / Executive Transport':    'Delivers the polished, precision planning standard expected for senior official travel, with centralized admin ensuring every crew has the same current data, and ops staff can monitor and update missions without breaking the crew\'s workflow.',
       'Close Air Support (CAS)':      'Full TFR, threat, and strike package planning tools with centralized wing-level admin give CAS units the fastest planning cycle available while command maintains real-time fleet visibility during surge operations.',
       'Electronic Warfare':           'Advanced orbit geometry planning and integration with jamming mission data alongside enterprise fleet admin that lets EW ops synchronize multi-ship jamming packages with escorted strike elements from one platform.',
       'Test & Evaluation':            'Flexible test card planning tools and advanced route/airspace management with enterprise admin give T&E programs a scalable platform across multiple test articles and ranges without requiring separate planning tools per airframe.',
-      'Attack / Strike':              'Full-featured strike planning with terrain analysis, weapons deconfliction overlays, and centralized wing admin — gives attack units the fastest ATO-to-cockpit-ready planning pipeline available for high-tempo sustained operations.',
+      'Attack / Strike':              'Full-featured strike planning with terrain analysis, weapons deconfliction overlays, and centralized wing admin, gives attack units the fastest ATO-to-cockpit-ready planning pipeline available for high-tempo sustained operations.',
       'Logistics / Cargo':            'Cargo routing optimization, multi-stop fuel planning, and enterprise fleet admin give logistics units a scalable platform that manages high-frequency sortie operations without the per-mission administrative overhead of disconnected tools.',
-      'General Reseller (Manned)':    'The flagship advanced-tier military EFB — gives resellers a premium product conversation anchored to the most universal customer pain point (crew workload) while opening the door to enterprise-level admin, fleet management, and integration features that create long-term account stickiness.',
-      'General Reseller (UAS)':       'Advanced multi-UAS mission planning and enterprise fleet admin for GCS operators — gives resellers a scalable platform conversation that starts with situational awareness and grows into full C2 integration as the customer\'s unmanned fleet expands.',
-      'UAS ISR / Reconnaissance':     'Advanced persistent ISR orbit management with enterprise GCS fleet admin — gives ISR ops centers the multi-asset coordination and real-time update capability needed to sustain continuous collection without voice coordination overhead.',
-      'UAS Strike':                   'Full-featured strike UAS planning with advanced corridor management, weapons deconfliction, and enterprise C2 admin — gives strike UAS ops centers the planning speed and real-time retasking capability required for time-sensitive targeting.',
-      'UAS Logistics / Resupply':     'Advanced logistics corridor optimization and enterprise delivery fleet management — gives distribution managers the real-time visibility and dynamic rerouting capability needed to sustain continuous forward resupply at scale.',
-      'UAS Training':                 'Enterprise GCS training management with instructor monitoring and bulk syllabus tracking — gives UAS training programs a scalable admin platform that prevents bottlenecks as student throughput grows.'
+      'General Reseller (Manned)':    'The flagship advanced-tier military EFB, gives resellers a premium product conversation anchored to the most universal customer pain point (crew workload) while opening the door to enterprise-level admin, fleet management, and integration features that create long-term account stickiness.',
+      'General Reseller (UAS)':       'Advanced multi-UAS mission planning and enterprise fleet admin for GCS operators, gives resellers a scalable platform conversation that starts with situational awareness and grows into full C2 integration as the customer\'s unmanned fleet expands.',
+      'UAS ISR / Reconnaissance':     'Advanced persistent ISR orbit management with enterprise GCS fleet admin, gives ISR ops centers the multi-asset coordination and real-time update capability needed to sustain continuous collection without voice coordination overhead.',
+      'UAS Strike':                   'Full-featured strike UAS planning with advanced corridor management, weapons deconfliction, and enterprise C2 admin, gives strike UAS ops centers the planning speed and real-time retasking capability required for time-sensitive targeting.',
+      'UAS Logistics / Resupply':     'Advanced logistics corridor optimization and enterprise delivery fleet management, gives distribution managers the real-time visibility and dynamic rerouting capability needed to sustain continuous forward resupply at scale.',
+      'UAS Training':                 'Enterprise GCS training management with instructor monitoring and bulk syllabus tracking, gives UAS training programs a scalable admin platform that prevents bottlenecks as student throughput grows.'
     },
     'MFB Performance': {
       'Training Command':             'Integrates takeoff, landing, and obstacle-clearance performance calculations into the student pre-flight workflow, building correct performance planning habits on every training sortie and eliminating the separate app or paper chart requirement that fragments training command EFB standardization.',
-      'OSA (Operational Support Airlift)': 'Delivers real-time takeoff and landing performance directly in the EFB for the diverse airfields and variable loads common to OSA missions — eliminating the tablet-swap to a separate performance app that adds time and error risk to short-notice pre-flight planning.',
-      'ISR':                          'Provides ISR crews integrated performance analysis for forward operating locations with non-standard runway data, embedded in the same EFB used for route and weather planning — no separate tool, no manual data transfer.',
+      'OSA (Operational Support Airlift)': 'Delivers real-time takeoff and landing performance directly in the EFB for the diverse airfields and variable loads common to OSA missions, eliminating the tablet-swap to a separate performance app that adds time and error risk to short-notice pre-flight planning.',
+      'ISR':                          'Provides ISR crews integrated performance analysis for forward operating locations with non-standard runway data, embedded in the same EFB used for route and weather planning, no separate tool, no manual data transfer.',
       'Air Transport / Airlift':      'Automates weight-restricted departure and landing performance calculations for the wide range of airfields used by airlift fleets, keeping performance analysis inside the EFB and eliminating the disconnected paper-and-calculator process that slows high-tempo ops.',
       'Special Operations':           'Provides SOF crews real-time OEI and obstacle-clearance data for austere infiltration and exfiltration sites, fully integrated into the mission planning workflow without a separate performance application or manual chart lookup.',
-      'Combat Search & Rescue (CSAR)':'Delivers critical pickup-site performance analysis for varying rescue loads, directly in the EFB — giving CSAR crews the weight-and-density-altitude calculations they need in the compressed pre-launch window without breaking the mission planning flow.',
+      'Combat Search & Rescue (CSAR)':'Delivers critical pickup-site performance analysis for varying rescue loads, directly in the EFB, giving CSAR crews the weight-and-density-altitude calculations they need in the compressed pre-launch window without breaking the mission planning flow.',
       'Aerial Refueling / Tanker':    'Provides max gross weight departure and overweight landing analysis for tankers departing at full fuel load, integrated into the EFB so crews have current performance data alongside their fuel plan without switching tools.',
       'Maritime Patrol':              'Integrates performance analysis for coastal and island airfields into the same maritime patrol planning platform, eliminating the need for separate performance charts when operating into weight-restricted or non-published airstrips.',
       'MEDEVAC':                      'Delivers real-time performance analysis for confined pickup sites and medical facility helipads with varying casualty loads, embedded in the MEDEVAC EFB workflow so crews get accurate departure data without a separate performance app.',
-      'VIP / Executive Transport':    'Provides precise performance calculations for VIP transport aircraft at high-density airports, fully integrated into the crew\'s EFB planning workflow — delivering the accuracy required for senior official travel without manual chart lookup.',
+      'VIP / Executive Transport':    'Provides precise performance calculations for VIP transport aircraft at high-density airports, fully integrated into the crew\'s EFB planning workflow, delivering the accuracy required for senior official travel without manual chart lookup.',
       'Close Air Support (CAS)':      'Calculates max gross weight takeoff performance for varying weapons loadout configurations in the EFB, giving CAS crews accurate obstacle clearance data for expeditionary strip departures without breaking the pre-mission planning flow.',
       'Electronic Warfare':           'Provides EW aircraft performance analysis at max pod weight, integrated into the mission EFB so crews have current departure data alongside their jamming orbit plan without switching to a separate application.',
-      'Test & Evaluation':            'Delivers precise performance calculations for non-standard aircraft configurations with test instrumentation installed, embedded in the T&E EFB workflow — ensuring accurate data validity for every sortie without manual performance chart lookup.',
-      'Attack / Strike':              'Provides combat-weight takeoff and obstacle-clearance performance for attack aircraft departing expeditionary fields, fully integrated into the strike planning EFB — eliminating the separate performance tool that slows the ATO-to-launch cycle.',
+      'Test & Evaluation':            'Delivers precise performance calculations for non-standard aircraft configurations with test instrumentation installed, embedded in the T&E EFB workflow, ensuring accurate data validity for every sortie without manual performance chart lookup.',
+      'Attack / Strike':              'Provides combat-weight takeoff and obstacle-clearance performance for attack aircraft departing expeditionary fields, fully integrated into the strike planning EFB, eliminating the separate performance tool that slows the ATO-to-launch cycle.',
       'Logistics / Cargo':            'Automates weight-restricted performance calculations for varying cargo loads directly in the logistics EFB, preventing overweight departure attempts at forward airfields without adding a separate tablet or paper chart step to the pre-departure flow.',
-      'General Reseller (Manned)':    'Integrates takeoff and landing performance into the crew\'s existing EFB, eliminating the most common separate-tool gap in military flight planning — giving resellers a high-value add-on conversation rooted in safety and workflow efficiency for any manned platform.',
-      'General Reseller (UAS)':       'Provides fixed-wing UAS performance planning for launch and recovery at austere forward strips, embedded in the GCS operator EFB — giving resellers an early-mover advantage before customers realize they need it.',
+      'General Reseller (Manned)':    'Integrates takeoff and landing performance into the crew\'s existing EFB, eliminating the most common separate-tool gap in military flight planning, giving resellers a high-value add-on conversation rooted in safety and workflow efficiency for any manned platform.',
+      'General Reseller (UAS)':       'Provides fixed-wing UAS performance planning for launch and recovery at austere forward strips, embedded in the GCS operator EFB, giving resellers an early-mover advantage before customers realize they need it.',
       'UAS ISR / Reconnaissance':     'Delivers performance analysis for fixed-wing ISR UAS at forward operating locations with non-standard runway data, embedded in the GCS planning workflow without requiring a separate performance application.',
-      'UAS Strike':                   'Provides max gross weight performance analysis for strike UAS with full weapons loadouts, integrated into the GCS planning EFB — ensuring accurate departure data at forward bases without a separate tool.',
+      'UAS Strike':                   'Provides max gross weight performance analysis for strike UAS with full weapons loadouts, integrated into the GCS planning EFB, ensuring accurate departure data at forward bases without a separate tool.',
       'UAS Logistics / Resupply':     'Automates payload weight and density-altitude performance calculations for logistics UAS, preventing overweight departures from high-altitude forward bases without adding a separate analysis step to the launch preparation workflow.',
-      'UAS Training':                 'Builds performance planning habits in student GCS operators by integrating takeoff and landing analysis into the training EFB from day one — establishing the procedures they will apply at operational units before they face the real consequences.'
+      'UAS Training':                 'Builds performance planning habits in student GCS operators by integrating takeoff and landing analysis into the training EFB from day one, establishing the procedures they will apply at operational units before they face the real consequences.'
     },
     'Sentry': {
       'Training Command':             'Provides student aircraft portable ADS-B traffic and FIS-B weather without avionics modification, giving training commands a low-cost way to add situational awareness to legacy trainers while their airworthiness documentation remains unchanged.',
-      'OSA (Operational Support Airlift)': 'Delivers real-time traffic alerting and FIS-B weather to OSA crews on any tablet without avionics modifications — eliminating a critical situational awareness gap on legacy OSA platforms where certified ADS-B installations would require costly STC work.',
+      'OSA (Operational Support Airlift)': 'Delivers real-time traffic alerting and FIS-B weather to OSA crews on any tablet without avionics modifications, eliminating a critical situational awareness gap on legacy OSA platforms where certified ADS-B installations would require costly STC work.',
       'ISR':                          'Provides portable ADS-B traffic alerting for ISR platforms operating in mixed civil/military airspace, giving crews low-cost supplemental situational awareness on their EFB tablet without any avionics modification to mission-critical aircraft.',
       'Air Transport / Airlift':      'Adds portable ADS-B traffic and weather to airlift crews operating on legacy platforms, providing a low-cost situational awareness supplement while certified cockpit installations are programmed or funded.',
       'Special Operations':           'Provides SOF crews portable traffic alerting and FIS-B weather data on their EFB tablet without requiring avionics modifications that would delay airworthiness approval for mission-configured platforms.',
       'Combat Search & Rescue (CSAR)':'Delivers real-time traffic alerting to CSAR crews operating in congested airspace during active rescue operations, using a portable ADS-B receiver that requires no avionics modification to the rescue aircraft.',
       'Aerial Refueling / Tanker':    'Provides tanker crews portable ADS-B traffic situational awareness during AR tracks in congested airspace, supplementing cockpit displays with EFB-integrated traffic alerts without requiring additional aircraft modifications.',
       'Maritime Patrol':              'Adds portable ADS-B traffic awareness to maritime patrol aircraft operating in coastal airspace with high civil/military traffic density, without the STC cost and downtime of a certified avionics installation.',
-      'MEDEVAC':                      'Delivers portable traffic alerting to MEDEVAC crews operating into high-density civil airspace around hospitals and treatment facilities — a low-cost ADS-B solution requiring no aircraft modification that improves safety on time-critical casualty flights.',
+      'MEDEVAC':                      'Delivers portable traffic alerting to MEDEVAC crews operating into high-density civil airspace around hospitals and treatment facilities, a low-cost ADS-B solution requiring no aircraft modification that improves safety on time-critical casualty flights.',
       'VIP / Executive Transport':    'Provides VIP transport crews portable ADS-B traffic and weather supplemental awareness at high-density civil airports, without avionics modifications that would require recertification of precisely configured VIP aircraft.',
       'Close Air Support (CAS)':      'Gives CAS crews portable traffic awareness in mixed airspace during transit and holding, using a no-modification ADS-B receiver that keeps the EFB traffic picture current without any impact to the aircraft\'s weapons system configuration.',
       'Electronic Warfare':           'Provides EW platform crews portable ADS-B traffic awareness during transit without requiring avionics modifications that could affect EMI characteristics or airworthiness certification of EW-configured aircraft.',
-      'Test & Evaluation':            'Adds portable ADS-B traffic and weather to test aircraft without avionics modifications that would complicate test configuration control — giving T&E crews supplemental situational awareness on the EFB without impacting instrumentation or airworthiness.',
-      'Attack / Strike':              'Provides portable ADS-B traffic alerting for attack aircraft during transit phases without modification — giving crews supplemental traffic awareness on their EFB without affecting weapons system certification or configuration documentation.',
-      'Logistics / Cargo':            'Delivers portable ADS-B traffic and weather to logistics crews on legacy platforms without modification costs — improving situational awareness on high-frequency sorties into mixed civil/military airfields without a certified avionics installation.',
-      'General Reseller (Manned)':    'A low-cost, no-modification ADS-B solution that gives resellers an accessible entry-point conversation for any customer with legacy aircraft — addresses a universal situational awareness gap without requiring STC work, making it an easy first win that builds trust for larger platform deals.',
-      'General Reseller (UAS)':       'Portable ADS-B traffic awareness for GCS operators monitoring their UAS in mixed airspace — gives resellers a low-cost add-on conversation that improves operator situational awareness without any integration complexity.',
+      'Test & Evaluation':            'Adds portable ADS-B traffic and weather to test aircraft without avionics modifications that would complicate test configuration control, giving T&E crews supplemental situational awareness on the EFB without impacting instrumentation or airworthiness.',
+      'Attack / Strike':              'Provides portable ADS-B traffic alerting for attack aircraft during transit phases without modification, giving crews supplemental traffic awareness on their EFB without affecting weapons system certification or configuration documentation.',
+      'Logistics / Cargo':            'Delivers portable ADS-B traffic and weather to logistics crews on legacy platforms without modification costs, improving situational awareness on high-frequency sorties into mixed civil/military airfields without a certified avionics installation.',
+      'General Reseller (Manned)':    'A low-cost, no-modification ADS-B solution that gives resellers an accessible entry-point conversation for any customer with legacy aircraft, addresses a universal situational awareness gap without requiring STC work, making it an easy first win that builds trust for larger platform deals.',
+      'General Reseller (UAS)':       'Portable ADS-B traffic awareness for GCS operators monitoring their UAS in mixed airspace, gives resellers a low-cost add-on conversation that improves operator situational awareness without any integration complexity.',
       'UAS ISR / Reconnaissance':     'Provides GCS operators portable ADS-B traffic awareness for the airspace surrounding ISR orbits, supplementing the GCS display with real-time traffic alerting on the EFB without any system integration requirement.',
       'UAS Strike':                   'Gives GCS operators portable ADS-B awareness of the airspace around strike corridors, providing supplemental traffic alerting during mission execution without the integration overhead of a certified ATC transponder system.',
       'UAS Logistics / Resupply':     'Provides logistics UAS GCS operators portable ADS-B traffic awareness along delivery corridors, giving dispatch teams real-time airspace picture on their EFB without system integration costs.',
@@ -771,49 +817,49 @@ var VALUE_PROPS = {
     },
     'Onboard Performance Tool': {
       'Training Command':             'Replaces the paper performance charts and separate app with an EFB-integrated takeoff and landing analysis tool, standardizing performance planning across the entire training fleet and ensuring every student calculates correct obstacle clearance data on every sortie.',
-      'OSA (Operational Support Airlift)': 'Delivers real-time runway performance analysis for the diverse destination types OSA missions encounter — from large military airfields to small civil strips — directly in the mission EFB, eliminating the manual chart lookup that delays short-notice OSA pre-flight planning.',
+      'OSA (Operational Support Airlift)': 'Delivers real-time runway performance analysis for the diverse destination types OSA missions encounter (from large military airfields to small civil strips) directly in the mission EFB, eliminating the manual chart lookup that delays short-notice OSA pre-flight planning.',
       'ISR':                          'Provides ISR crews integrated performance analysis for the forward operating locations and non-standard airfields common to long-range ISR operations, with current density altitude and obstacle data embedded in the planning workflow.',
       'Air Transport / Airlift':      'Automates takeoff and landing performance for airlift crews operating into weight-restricted civil and military airfields, replacing manual chart interpolation with EFB-integrated analysis that reduces per-sortie prep time and eliminates common calculation errors.',
-      'Special Operations':           'Delivers real-time OEI and obstacle-clearance performance analysis for austere SOF infiltration/exfiltration sites, integrated into the mission EFB and updated for current conditions — critical for night ops from non-published strips at max gross weight.',
+      'Special Operations':           'Delivers real-time OEI and obstacle-clearance performance analysis for austere SOF infiltration/exfiltration sites, integrated into the mission EFB and updated for current conditions, critical for night ops from non-published strips at max gross weight.',
       'Combat Search & Rescue (CSAR)':'Provides CSAR crews integrated performance analysis for confined pickup sites and forward staging bases with varying rescue load configurations, eliminating the separate performance tool in the compressed time window between alert and launch.',
       'Aerial Refueling / Tanker':    'Delivers max gross weight takeoff and overweight landing performance analysis for tankers departing at full fuel load, integrated into the planning EFB so crews have current performance data alongside their AR routing without switching applications.',
       'Maritime Patrol':              'Integrates performance analysis for the coastal and island airfields used by maritime patrol aircraft, including density altitude and obstacle clearance for forward staging bases with limited published performance data.',
-      'MEDEVAC':                      'Provides real-time performance calculations for MEDEVAC operations from confined helipads and non-standard pickup sites with varying casualty loads — integrated into the crew\'s EFB so accurate departure analysis is available in the time-critical window before launch.',
+      'MEDEVAC':                      'Provides real-time performance calculations for MEDEVAC operations from confined helipads and non-standard pickup sites with varying casualty loads, integrated into the crew\'s EFB so accurate departure analysis is available in the time-critical window before launch.',
       'VIP / Executive Transport':    'Delivers precise takeoff and landing performance for VIP transport operations into high-density and weight-restricted airports, integrated into the crew\'s EFB planning workflow to ensure zero-fault performance compliance for senior official travel.',
       'Close Air Support (CAS)':      'Calculates max gross weight takeoff performance and obstacle clearance for CAS aircraft with varying weapons configurations at expeditionary airfields, integrated into the pre-mission EFB to give crews accurate data without a separate performance application.',
-      'Electronic Warfare':           'Delivers performance analysis for EW aircraft at max pod weight from forward locations, embedded in the mission planning EFB — ensuring crews have accurate departure and obstacle clearance data without breaking the jamming mission planning workflow.',
-      'Test & Evaluation':            'Provides precise performance calculations for test aircraft with non-standard instrumentation configurations, integrated into the T&E EFB — ensuring accurate data for test validity without manual performance chart interpolation for each unique article weight.',
+      'Electronic Warfare':           'Delivers performance analysis for EW aircraft at max pod weight from forward locations, embedded in the mission planning EFB, ensuring crews have accurate departure and obstacle clearance data without breaking the jamming mission planning workflow.',
+      'Test & Evaluation':            'Provides precise performance calculations for test aircraft with non-standard instrumentation configurations, integrated into the T&E EFB, ensuring accurate data for test validity without manual performance chart interpolation for each unique article weight.',
       'Attack / Strike':              'Delivers real-time combat-weight takeoff performance and obstacle clearance for attack aircraft departing expeditionary strips, integrated into the strike planning EFB so crews have accurate data without the separate performance tool that slows pre-launch cycles.',
       'Logistics / Cargo':            'Automates runway performance for varying cargo and pallet configurations directly in the logistics EFB, preventing overweight departures at forward airfields and replacing the manual chart lookup that adds error risk to high-frequency resupply operations.',
-      'General Reseller (Manned)':    'Replaces the most common paper-and-manual-calculation holdout in military flight planning with an EFB-integrated performance tool — gives resellers a clear safety and efficiency argument for any customer still using printed performance charts or a separate app.',
-      'General Reseller (UAS)':       'Integrates fixed-wing UAS departure and recovery performance analysis into the GCS operator EFB — gives resellers an early entry-point product before customers realize they need it, establishing credibility and preventing the performance-related incidents that follow.',
+      'General Reseller (Manned)':    'Replaces the most common paper-and-manual-calculation holdout in military flight planning with an EFB-integrated performance tool, gives resellers a clear safety and efficiency argument for any customer still using printed performance charts or a separate app.',
+      'General Reseller (UAS)':       'Integrates fixed-wing UAS departure and recovery performance analysis into the GCS operator EFB, gives resellers an early entry-point product before customers realize they need it, establishing credibility and preventing the performance-related incidents that follow.',
       'UAS ISR / Reconnaissance':     'Provides performance analysis for fixed-wing ISR UAS at forward operating locations with non-standard runway data, integrated into the GCS planning workflow without requiring a separate performance application or manual chart interpolation.',
       'UAS Strike':                   'Delivers max gross weight performance analysis for strike UAS with full weapons configurations, integrated into the GCS planning EFB to ensure accurate departure data at forward bases without a separate tool.',
       'UAS Logistics / Resupply':     'Automates takeoff performance for logistics UAS with varying payload configurations at high-altitude forward bases, preventing density-altitude-related departure incidents without adding a separate analysis step to the launch preparation workflow.',
-      'UAS Training':                 'Builds correct performance planning habits in student GCS operators from the first sortie by integrating takeoff and landing analysis into the training EFB — establishing the procedures they will apply operationally before they face real consequences.'
+      'UAS Training':                 'Builds correct performance planning habits in student GCS operators from the first sortie by integrating takeoff and landing analysis into the training EFB, establishing the procedures they will apply operationally before they face real consequences.'
     },
     'IL-5': {
-      'Training Command':             'ForeFlight\'s DoD Impact Level 5 (IL-5) authorization under the DoD Cloud Computing SRG means the platform can store and process Controlled Unclassified Information — training syllabi, crew records, student flight data — in a DISA-authorized GovCloud environment. This removes the most common IT security objection to adopting a commercial EFB in a training command: the need for a unit-level waiver or independent ATO to host CUI in a non-government cloud. IL-5 authorization is pre-established; the unit\'s accreditation effort is a fraction of what it would be for a non-authorized platform, dramatically accelerating fielding timelines.',
-      'OSA (Operational Support Airlift)': 'ForeFlight\'s DoD Impact Level 5 (IL-5) authorization under the DoD Cloud Computing SRG means the platform can store and process Controlled Unclassified Information — mission routing, passenger manifests, logistics data — in a DISA-authorized GovCloud environment. For OSA units operating across DoD networks, this eliminates the IT security waiver process that blocks most commercial EFB adoptions and allows the platform to be used on NIPRNet without a separate unit ATO — a critical enabler for any unit that has stalled on EFB fielding due to network security concerns.',
-      'ISR':                          'ForeFlight\'s DoD Impact Level 5 (IL-5) authorization under the DoD Cloud Computing SRG means the platform can store and process Controlled Unclassified Information — collection requirements, mission routing, crew data — in a DISA-authorized GovCloud environment. For ISR units where data sensitivity is a constant concern, IL-5 authorization eliminates the IT security objection that has blocked most commercial EFB adoptions and enables use on DoD networks without a unit-level ATO waiver.',
-      'Air Transport / Airlift':      'ForeFlight\'s DoD Impact Level 5 (IL-5) authorization under the DoD Cloud Computing SRG means the platform can store and process Controlled Unclassified Information — cargo manifests, mission routing, crew records — in a DISA-authorized GovCloud environment. For airlift units operating on DoD networks, this removes the IT security barrier that has prevented most commercial EFB platforms from being used on NIPRNet, with no unit-level ATO required.',
-      'Special Operations':           'ForeFlight\'s DoD Impact Level 5 (IL-5) authorization under the DoD Cloud Computing SRG means the platform can store and process Controlled Unclassified Information — including sensitive mission routing and timing data — in a DISA-authorized GovCloud environment. For SOF units where data classification discipline is non-negotiable, IL-5 removes the IT security barrier to commercial EFB adoption without requiring a unit-level waiver or independent ATO on a non-authorized platform.',
-      'Combat Search & Rescue (CSAR)':'ForeFlight\'s DoD Impact Level 5 (IL-5) authorization under the DoD Cloud Computing SRG means the platform can store and process Controlled Unclassified Information — rescue routing, survivor coordinates, crew data — in a DISA-authorized GovCloud environment. IL-5 authorization removes the IT security objection that blocks commercial EFB adoption on DoD networks, enabling CSAR units to field the platform without a separate unit ATO or network waiver process.',
-      'Aerial Refueling / Tanker':    'ForeFlight\'s DoD Impact Level 5 (IL-5) authorization under the DoD Cloud Computing SRG means the platform can store and process Controlled Unclassified Information — AR track data, receiver schedules, mission routing — in a DISA-authorized GovCloud environment. IL-5 authorization enables tanker units to use the platform on DoD networks without the IT security waiver that has stalled most commercial EFB fielding efforts at the wing level.',
-      'Maritime Patrol':              'ForeFlight\'s DoD Impact Level 5 (IL-5) authorization under the DoD Cloud Computing SRG means the platform can store and process Controlled Unclassified Information — patrol routing, mission data, crew records — in a DISA-authorized GovCloud environment. IL-5 authorization eliminates the IT network security objection that has blocked most commercial EFB platforms from DoD use, enabling maritime patrol units to field without a separate unit ATO.',
-      'MEDEVAC':                      'ForeFlight\'s DoD Impact Level 5 (IL-5) authorization under the DoD Cloud Computing SRG means the platform can store and process Controlled Unclassified Information — patient data, evacuation routing, crew records — in a DISA-authorized GovCloud environment. For MEDEVAC units handling protected health information alongside CUI mission data, IL-5 removes the IT security barrier to commercial EFB adoption without a unit-level waiver or separate ATO process.',
-      'VIP / Executive Transport':    'ForeFlight\'s DoD Impact Level 5 (IL-5) authorization under the DoD Cloud Computing SRG means the platform can store and process Controlled Unclassified Information — senior official itineraries, passenger manifests, mission routing — in a DISA-authorized GovCloud environment. For VIP transport units where data handling standards are especially scrutinized, IL-5 authorization provides the compliance posture required to use the platform on DoD networks without a separate unit ATO.',
-      'Close Air Support (CAS)':      'ForeFlight\'s DoD Impact Level 5 (IL-5) authorization under the DoD Cloud Computing SRG means the platform can store and process Controlled Unclassified Information — target coordinates, strike routing, mission data — in a DISA-authorized GovCloud environment. IL-5 authorization is a prerequisite for any commercial platform to be used on DoD networks in a CAS environment, eliminating the waiver process and accelerating fielding timelines.',
-      'Electronic Warfare':           'ForeFlight\'s DoD Impact Level 5 (IL-5) authorization under the DoD Cloud Computing SRG means the platform can store and process Controlled Unclassified Information — threat parameters, mission routing, jamming coordination data — in a DISA-authorized GovCloud environment. For EW units where data sensitivity is built into every mission, IL-5 removes the IT security objection to commercial EFB adoption on DoD networks without a unit-level waiver.',
-      'Test & Evaluation':            'ForeFlight\'s DoD Impact Level 5 (IL-5) authorization under the DoD Cloud Computing SRG means the platform can store and process Controlled Unclassified Information — test data, performance records, program documentation — in a DISA-authorized GovCloud environment. IL-5 authorization removes the IT security barrier that prevents most commercial platforms from being used in test programs, eliminating the independent ATO effort that would otherwise add months to T&E EFB fielding.',
-      'Attack / Strike':              'ForeFlight\'s DoD Impact Level 5 (IL-5) authorization under the DoD Cloud Computing SRG means the platform can store and process Controlled Unclassified Information — target data, strike routing, weapons employment planning — in a DISA-authorized GovCloud environment. IL-5 is a hard requirement for any commercial platform used in an attack mission planning environment on DoD networks — having it pre-established eliminates the waiver process and removes the most common IT security objection.',
-      'Logistics / Cargo':            'ForeFlight\'s DoD Impact Level 5 (IL-5) authorization under the DoD Cloud Computing SRG means the platform can store and process Controlled Unclassified Information — cargo manifests, supply chain routing, mission data — in a DISA-authorized GovCloud environment. IL-5 enables logistics units to use the platform on DoD networks without a unit-level IT security waiver, removing the compliance barrier that has stalled commercial EFB adoption across most logistics aviation organizations.',
-      'General Reseller (Manned)':    'ForeFlight\'s DoD Impact Level 5 (IL-5) authorization under the DoD Cloud Computing SRG is one of the most powerful differentiators in a reseller conversation — it means the platform is already DISA-authorized to host Controlled Unclassified Information in a GovCloud environment, eliminating the IT security waiver process that blocks most commercial EFB adoptions on DoD networks. For any customer that has stalled on EFB fielding due to network security or accreditation concerns, IL-5 authorization removes the blocker and dramatically accelerates the path to contract.',
-      'General Reseller (UAS)':       'ForeFlight\'s DoD Impact Level 5 (IL-5) authorization under the DoD Cloud Computing SRG means the platform is already DISA-authorized to host Controlled Unclassified Information for UAS operations in a GovCloud environment. For resellers, IL-5 is a differentiator in any customer conversation where DoD network access or data handling compliance has been an objection — it removes the independent ATO requirement and positions ForeFlight as the only commercial UAS planning platform with the security posture to operate on DoD networks.',
-      'UAS ISR / Reconnaissance':     'ForeFlight\'s DoD Impact Level 5 (IL-5) authorization under the DoD Cloud Computing SRG means the platform can store and process Controlled Unclassified Information — collection requirements, mission routing, GCS operator records — in a DISA-authorized GovCloud environment. For ISR UAS units where data handling compliance is a constant operational concern, IL-5 eliminates the IT security waiver process and enables use on DoD networks without a unit-level ATO.',
-      'UAS Strike':                   'ForeFlight\'s DoD Impact Level 5 (IL-5) authorization under the DoD Cloud Computing SRG means the platform can store and process Controlled Unclassified Information — target data, strike corridors, mission planning records — in a DISA-authorized GovCloud environment. IL-5 is a hard requirement for any commercial UAS planning platform used in a strike environment on DoD networks — pre-established authorization removes the compliance barrier and positions ForeFlight ahead of any non-authorized competitor.',
-      'UAS Logistics / Resupply':     'ForeFlight\'s DoD Impact Level 5 (IL-5) authorization under the DoD Cloud Computing SRG means the platform can store and process Controlled Unclassified Information — delivery routing, payload manifests, mission records — in a DISA-authorized GovCloud environment. IL-5 removes the IT network security objection that has blocked most commercial UAS planning platforms from DoD use, enabling logistics UAS units to field without a separate ATO process.',
-      'UAS Training':                 'ForeFlight\'s DoD Impact Level 5 (IL-5) authorization under the DoD Cloud Computing SRG means the platform can store and process Controlled Unclassified Information — student records, training data, syllabus documentation — in a DISA-authorized GovCloud environment. IL-5 authorization allows UAS training programs to adopt the platform on DoD networks without a unit-level waiver, removing the compliance barrier that has blocked most commercial GCS training tool adoptions.'
+      'Training Command':             'ForeFlight\'s DoD Impact Level 5 (IL-5) authorization under the DoD Cloud Computing SRG means the platform can store and process Controlled Unclassified Information (training syllabi, crew records, student flight data) in a DISA-authorized GovCloud environment. This removes the most common IT security objection to adopting a commercial EFB in a training command: the need for a unit-level waiver or independent ATO to host CUI in a non-government cloud. IL-5 authorization is pre-established; the unit\'s accreditation effort is a fraction of what it would be for a non-authorized platform, dramatically accelerating fielding timelines.',
+      'OSA (Operational Support Airlift)': 'ForeFlight\'s DoD Impact Level 5 (IL-5) authorization under the DoD Cloud Computing SRG means the platform can store and process Controlled Unclassified Information (mission routing, passenger manifests, logistics data) in a DISA-authorized GovCloud environment. For OSA units operating across DoD networks, this eliminates the IT security waiver process that blocks most commercial EFB adoptions and allows the platform to be used on NIPRNet without a separate unit ATO, a critical enabler for any unit that has stalled on EFB fielding due to network security concerns.',
+      'ISR':                          'ForeFlight\'s DoD Impact Level 5 (IL-5) authorization under the DoD Cloud Computing SRG means the platform can store and process Controlled Unclassified Information (collection requirements, mission routing, crew data) in a DISA-authorized GovCloud environment. For ISR units where data sensitivity is a constant concern, IL-5 authorization eliminates the IT security objection that has blocked most commercial EFB adoptions and enables use on DoD networks without a unit-level ATO waiver.',
+      'Air Transport / Airlift':      'ForeFlight\'s DoD Impact Level 5 (IL-5) authorization under the DoD Cloud Computing SRG means the platform can store and process Controlled Unclassified Information (cargo manifests, mission routing, crew records) in a DISA-authorized GovCloud environment. For airlift units operating on DoD networks, this removes the IT security barrier that has prevented most commercial EFB platforms from being used on NIPRNet, with no unit-level ATO required.',
+      'Special Operations':           'ForeFlight\'s DoD Impact Level 5 (IL-5) authorization under the DoD Cloud Computing SRG means the platform can store and process Controlled Unclassified Information (including sensitive mission routing and timing data) in a DISA-authorized GovCloud environment. For SOF units where data classification discipline is non-negotiable, IL-5 removes the IT security barrier to commercial EFB adoption without requiring a unit-level waiver or independent ATO on a non-authorized platform.',
+      'Combat Search & Rescue (CSAR)':'ForeFlight\'s DoD Impact Level 5 (IL-5) authorization under the DoD Cloud Computing SRG means the platform can store and process Controlled Unclassified Information (rescue routing, survivor coordinates, crew data) in a DISA-authorized GovCloud environment. IL-5 authorization removes the IT security objection that blocks commercial EFB adoption on DoD networks, enabling CSAR units to field the platform without a separate unit ATO or network waiver process.',
+      'Aerial Refueling / Tanker':    'ForeFlight\'s DoD Impact Level 5 (IL-5) authorization under the DoD Cloud Computing SRG means the platform can store and process Controlled Unclassified Information (AR track data, receiver schedules, mission routing) in a DISA-authorized GovCloud environment. IL-5 authorization enables tanker units to use the platform on DoD networks without the IT security waiver that has stalled most commercial EFB fielding efforts at the wing level.',
+      'Maritime Patrol':              'ForeFlight\'s DoD Impact Level 5 (IL-5) authorization under the DoD Cloud Computing SRG means the platform can store and process Controlled Unclassified Information (patrol routing, mission data, crew records) in a DISA-authorized GovCloud environment. IL-5 authorization eliminates the IT network security objection that has blocked most commercial EFB platforms from DoD use, enabling maritime patrol units to field without a separate unit ATO.',
+      'MEDEVAC':                      'ForeFlight\'s DoD Impact Level 5 (IL-5) authorization under the DoD Cloud Computing SRG means the platform can store and process Controlled Unclassified Information (patient data, evacuation routing, crew records) in a DISA-authorized GovCloud environment. For MEDEVAC units handling protected health information alongside CUI mission data, IL-5 removes the IT security barrier to commercial EFB adoption without a unit-level waiver or separate ATO process.',
+      'VIP / Executive Transport':    'ForeFlight\'s DoD Impact Level 5 (IL-5) authorization under the DoD Cloud Computing SRG means the platform can store and process Controlled Unclassified Information (senior official itineraries, passenger manifests, mission routing) in a DISA-authorized GovCloud environment. For VIP transport units where data handling standards are especially scrutinized, IL-5 authorization provides the compliance posture required to use the platform on DoD networks without a separate unit ATO.',
+      'Close Air Support (CAS)':      'ForeFlight\'s DoD Impact Level 5 (IL-5) authorization under the DoD Cloud Computing SRG means the platform can store and process Controlled Unclassified Information (target coordinates, strike routing, mission data) in a DISA-authorized GovCloud environment. IL-5 authorization is a prerequisite for any commercial platform to be used on DoD networks in a CAS environment, eliminating the waiver process and accelerating fielding timelines.',
+      'Electronic Warfare':           'ForeFlight\'s DoD Impact Level 5 (IL-5) authorization under the DoD Cloud Computing SRG means the platform can store and process Controlled Unclassified Information (threat parameters, mission routing, jamming coordination data) in a DISA-authorized GovCloud environment. For EW units where data sensitivity is built into every mission, IL-5 removes the IT security objection to commercial EFB adoption on DoD networks without a unit-level waiver.',
+      'Test & Evaluation':            'ForeFlight\'s DoD Impact Level 5 (IL-5) authorization under the DoD Cloud Computing SRG means the platform can store and process Controlled Unclassified Information (test data, performance records, program documentation) in a DISA-authorized GovCloud environment. IL-5 authorization removes the IT security barrier that prevents most commercial platforms from being used in test programs, eliminating the independent ATO effort that would otherwise add months to T&E EFB fielding.',
+      'Attack / Strike':              'ForeFlight\'s DoD Impact Level 5 (IL-5) authorization under the DoD Cloud Computing SRG means the platform can store and process Controlled Unclassified Information (target data, strike routing, weapons employment planning) in a DISA-authorized GovCloud environment. IL-5 is a hard requirement for any commercial platform used in an attack mission planning environment on DoD networks, having it pre-established eliminates the waiver process and removes the most common IT security objection.',
+      'Logistics / Cargo':            'ForeFlight\'s DoD Impact Level 5 (IL-5) authorization under the DoD Cloud Computing SRG means the platform can store and process Controlled Unclassified Information (cargo manifests, supply chain routing, mission data) in a DISA-authorized GovCloud environment. IL-5 enables logistics units to use the platform on DoD networks without a unit-level IT security waiver, removing the compliance barrier that has stalled commercial EFB adoption across most logistics aviation organizations.',
+      'General Reseller (Manned)':    'ForeFlight\'s DoD Impact Level 5 (IL-5) authorization under the DoD Cloud Computing SRG is one of the most powerful differentiators in a reseller conversation, it means the platform is already DISA-authorized to host Controlled Unclassified Information in a GovCloud environment, eliminating the IT security waiver process that blocks most commercial EFB adoptions on DoD networks. For any customer that has stalled on EFB fielding due to network security or accreditation concerns, IL-5 authorization removes the blocker and dramatically accelerates the path to contract.',
+      'General Reseller (UAS)':       'ForeFlight\'s DoD Impact Level 5 (IL-5) authorization under the DoD Cloud Computing SRG means the platform is already DISA-authorized to host Controlled Unclassified Information for UAS operations in a GovCloud environment. For resellers, IL-5 is a differentiator in any customer conversation where DoD network access or data handling compliance has been an objection, it removes the independent ATO requirement and positions ForeFlight as the only commercial UAS planning platform with the security posture to operate on DoD networks.',
+      'UAS ISR / Reconnaissance':     'ForeFlight\'s DoD Impact Level 5 (IL-5) authorization under the DoD Cloud Computing SRG means the platform can store and process Controlled Unclassified Information (collection requirements, mission routing, GCS operator records) in a DISA-authorized GovCloud environment. For ISR UAS units where data handling compliance is a constant operational concern, IL-5 eliminates the IT security waiver process and enables use on DoD networks without a unit-level ATO.',
+      'UAS Strike':                   'ForeFlight\'s DoD Impact Level 5 (IL-5) authorization under the DoD Cloud Computing SRG means the platform can store and process Controlled Unclassified Information (target data, strike corridors, mission planning records) in a DISA-authorized GovCloud environment. IL-5 is a hard requirement for any commercial UAS planning platform used in a strike environment on DoD networks, pre-established authorization removes the compliance barrier and positions ForeFlight ahead of any non-authorized competitor.',
+      'UAS Logistics / Resupply':     'ForeFlight\'s DoD Impact Level 5 (IL-5) authorization under the DoD Cloud Computing SRG means the platform can store and process Controlled Unclassified Information (delivery routing, payload manifests, mission records) in a DISA-authorized GovCloud environment. IL-5 removes the IT network security objection that has blocked most commercial UAS planning platforms from DoD use, enabling logistics UAS units to field without a separate ATO process.',
+      'UAS Training':                 'ForeFlight\'s DoD Impact Level 5 (IL-5) authorization under the DoD Cloud Computing SRG means the platform can store and process Controlled Unclassified Information (student records, training data, syllabus documentation) in a DISA-authorized GovCloud environment. IL-5 authorization allows UAS training programs to adopt the platform on DoD networks without a unit-level waiver, removing the compliance barrier that has blocked most commercial GCS training tool adoptions.'
     }
   };
 
@@ -839,23 +885,23 @@ VALUE_PROPS['Domestic Mainline'] = {
   'TAAM':                     'Models runway congestion, gate turn times, and slot utilization at hub airports to identify bottleneck sources and support infrastructure planning discussions with airport authorities.',
   'ForeFlight Dispatch':      'Streamlines domestic flight release with integrated weather, NOTAM, and routing tools on a single platform, reducing OCC workload across high-volume daily operations.',
   'Jeppesen Dispatch':        'Provides enterprise-grade flight planning and dispatch with ACARS integration, fuel optimization, and regulatory compliance tools built for high-frequency mainline carrier operations.',
-  'Jeppesen Crew Briefing':   'Delivers paperless, digitally signed crew briefing packages — weather, NOTAM, OFP, charts — to mobile devices, reducing pre-departure admin and ensuring consistent briefing standards fleet-wide.',
+  'Jeppesen Crew Briefing':   'Delivers paperless, digitally signed crew briefing packages (weather, NOTAM, OFP, charts) to mobile devices, reducing pre-departure admin and ensuring consistent briefing standards fleet-wide.',
   'Fleet Tracking':           'Gives operations control real-time position and status visibility across the domestic fleet, enabling proactive recovery decisions before delays cascade through the hub system.',
   'Ops Manager':              'Centralizes scheduling, crew duty tracking, and maintenance status into a single OCC view, reducing phone coordination overhead and improving on-time departure rates.',
   'Jeppesen Runway Analysis': 'Provides certified runway analysis data for all destination airports, ensuring regulatory compliance and enabling confident dispatch decisions when field conditions or weight limits change.'
 };
 VALUE_PROPS['International Long-Haul'] = {
-  'FliteDeck Pro':            'Provides globally-current terminal charts, ETOPS alternate data, and enroute coverage with automatic revision alerts — supporting ICAO compliance across every region in the network.',
+  'FliteDeck Pro':            'Provides globally-current terminal charts, ETOPS alternate data, and enroute coverage with automatic revision alerts, supporting ICAO compliance across every region in the network.',
   'Jeppesen Charts':          'Covers international approach procedures, RNAV arrivals, and airport diagrams across all ICAO regions with revision notifications aligned to local AIP amendment cycles.',
-  'Jeppesen NavData':         'Maintains synchronized FMS databases for complex oceanic, polar, and cross-ICAO routing — including RVSM routes and non-standard tracks — keeping every airframe compliant worldwide.',
+  'Jeppesen NavData':         'Maintains synchronized FMS databases for complex oceanic, polar, and cross-ICAO routing (including RVSM routes and non-standard tracks) keeping every airframe compliant worldwide.',
   'Onboard Performance Tool': 'Calculates certified takeoff and landing performance for international destinations with extreme altitude, temperature, or contaminated runway conditions critical for long-haul route planning.',
   'TAAM':                     'Models new international route pairs, airspace restrictions, and overflight routing scenarios to validate feasibility and support ATC coordination before scheduling commitment.',
   'ForeFlight Dispatch':      'Integrates SIGMET, PIREP, and international NOTAM data into a single dispatcher view, reducing the complexity of coordinating long-haul release packages across multiple ICAO regions.',
   'Jeppesen Dispatch':        'Produces ICAO-compliant international flight plans with optimized oceanic track selection, fuel tankering analysis, and ETOPS alternate pairing for each long-haul departure.',
-  'Jeppesen Crew Briefing':   'Delivers comprehensive international briefing packages — including customs, slot, and diplomatic clearance data — to crew devices before departure, reducing long-haul turnaround admin.',
+  'Jeppesen Crew Briefing':   'Delivers comprehensive international briefing packages (including customs, slot, and diplomatic clearance data) to crew devices before departure, reducing long-haul turnaround admin.',
   'Fleet Tracking':           'Maintains satellite-position tracking across intercontinental segments where radar coverage is absent, providing OCC with continuous accountability and diversion coordination capability.',
   'Ops Manager':              'Manages international crew pairing, rest requirements across time zones, and passport/visa compliance tracking for complex long-haul crew rotations.',
-  'Jeppesen Runway Analysis': 'Provides certified performance analysis for international destination airports with challenging terrain, high-altitude fields, or regularly contaminated runways — essential for route approval.'
+  'Jeppesen Runway Analysis': 'Provides certified performance analysis for international destination airports with challenging terrain, high-altitude fields, or regularly contaminated runways, essential for route approval.'
 };
 VALUE_PROPS['Regional / Feeder'] = {
   'FliteDeck Pro':            'Ensures consistent chart revisions across mixed CRJ, E-Jet, and turboprop fleets operating under diverse codeshare agreements, maintaining approach currency regardless of airframe.',
@@ -877,7 +923,7 @@ VALUE_PROPS['Low-Cost Carrier (LCC)'] = {
   'Onboard Performance Tool': 'Maximizes takeoff weight on weight-limited LCC routes with certified performance calculations that tighten payload margins without the conservative buffers that leave revenue on the table.',
   'TAAM':                     'Supports capacity planning at congested slot-constrained airports by modeling slot utilization, gate turns, and taxi flow to identify revenue-limiting bottlenecks before schedule publication.',
   'ForeFlight Dispatch':      'Reduces OCC staffing costs with automated weather, NOTAM, and routing workflows scaled to large route networks with small dispatcher teams.',
-  'Jeppesen Dispatch':        'Enables lean dispatch operations with automated routing, fuel optimization, and release generation tools that reduce per-flight labor cost — critical for LCC margin management.',
+  'Jeppesen Dispatch':        'Enables lean dispatch operations with automated routing, fuel optimization, and release generation tools that reduce per-flight labor cost, critical for LCC margin management.',
   'Jeppesen Crew Briefing':   'Eliminates paper briefing printing and distribution costs with digital crew packages delivered to mobile devices before every departure.',
   'Fleet Tracking':           'Provides real-time fleet position visibility to OCC for minimum-cost IROPS recovery through early awareness of rotational disruptions.',
   'Ops Manager':              'Optimizes crew pairing and duty scheduling to minimize positioning cost and overtime exposure, supporting the labor cost discipline LCC unit economics require.',
@@ -898,16 +944,16 @@ VALUE_PROPS['Ultra-Low-Cost Carrier (ULCC)'] = {
 };
 VALUE_PROPS['Cargo / Freighter'] = {
   'FliteDeck Pro':            'Keeps freighter cockpits current on approach charts for irregular and ad-hoc cargo destinations, including remote airports and seasonal strips that rarely appear on mainline networks.',
-  'Jeppesen Charts':          'Covers the full range of cargo destinations worldwide — including non-IATA airports, remote strips, and charter destinations — with automatic revision updates aligned to local AIP cycles.',
+  'Jeppesen Charts':          'Covers the full range of cargo destinations worldwide (including non-IATA airports, remote strips, and charter destinations) with automatic revision updates aligned to local AIP cycles.',
   'Jeppesen NavData':         'Maintains FMS nav database currency on irregular freighter routes where destination lists change frequently and ad-hoc routing requires up-to-date waypoint and airway data.',
   'Onboard Performance Tool': 'Maximizes payload on weight-limited freighter departures with certified performance calculations, directly translating to additional revenue tons on every cargo sector.',
   'TAAM':                     'Models new cargo route viability and airspace slot availability for prospective freight network expansions or seasonal charter operations.',
   'ForeFlight Dispatch':      'Supports cargo dispatch workflows including hazmat NOTAM review and ad-hoc routing for irregular charter operations with rapidly changing schedules.',
   'Jeppesen Dispatch':        'Provides enterprise flight planning for scheduled and charter cargo operations, integrating fuel optimization and alternate planning for a diverse and frequently-changing destination network.',
-  'Jeppesen Crew Briefing':   'Delivers digital pre-departure briefing packages to freighter crews — including special cargo and hazmat loading data — without paper printing at remote cargo terminals.',
+  'Jeppesen Crew Briefing':   'Delivers digital pre-departure briefing packages to freighter crews (including special cargo and hazmat loading data) without paper printing at remote cargo terminals.',
   'Fleet Tracking':           'Gives cargo operations control real-time visibility into freighter positions across overnight and long-haul routes, enabling proactive ground handling coordination at destination.',
   'Ops Manager':              'Manages freighter crew scheduling across irregular operations and ad-hoc charters, maintaining duty-time compliance during high-demand seasonal peaks.',
-  'Jeppesen Runway Analysis': 'Provides certified performance analysis for cargo-specific considerations — maximum payload on contaminated or short runways — critical for profitable freighter operations at challenging fields.'
+  'Jeppesen Runway Analysis': 'Provides certified performance analysis for cargo-specific considerations (maximum payload on contaminated or short runways) critical for profitable freighter operations at challenging fields.'
 };
 VALUE_PROPS['VIP / Charter (Part 121)'] = {
   'FliteDeck Pro':            'Provides premium charter crews with always-current Jeppesen charts for any destination globally, ensuring first-class chart professionalism that matches the standard VIP clients expect.',
@@ -926,11 +972,11 @@ VALUE_PROPS['Transoceanic / ETOPS'] = {
   'FliteDeck Pro':            'Provides always-current oceanic charts, ETOPS alternate data, and North Atlantic Track waypoint coverage to ensure ICAO compliance across every transoceanic segment.',
   'Jeppesen Charts':          'Covers NAT, PACOT, and AUSOTS oceanic track coverage with automatic revision updates, ensuring crews have accurate organized track charts for every oceanic crossing.',
   'Jeppesen NavData':         'Maintains FMS databases with current oceanic waypoints, NAT coordinates, and ETOPS alternate routing data, preventing nav alerts that could require diversion to an unplanned alternate.',
-  'Onboard Performance Tool': 'Calculates certified performance for ETOPS-specific alternate airports — often high-altitude, short, or contaminated — ensuring dispatch can legally authorize the extended-range operation.',
+  'Onboard Performance Tool': 'Calculates certified performance for ETOPS-specific alternate airports (often high-altitude, short, or contaminated) ensuring dispatch can legally authorize the extended-range operation.',
   'TAAM':                     'Models new oceanic route pairs and alternate airport availability scenarios to support ETOPS authorization paperwork and route certification with FAA/EASA.',
   'ForeFlight Dispatch':      'Integrates SIGMET, oceanic track data, and ETOPS fuel planning into a single dispatcher view, reducing the complexity of coordinating extended transoceanic releases.',
   'Jeppesen Dispatch':        'Produces ICAO-compliant oceanic flight plans with current NAT/PACOT track selection, fuel tankering, and ETOPS alternate analysis for every long-haul departure.',
-  'Jeppesen Crew Briefing':   'Delivers complete transoceanic briefing packages — oceanic clearance, NAT coordinates, ETOPS alternate weather, NOTAMs — to crew devices before departure.',
+  'Jeppesen Crew Briefing':   'Delivers complete transoceanic briefing packages (oceanic clearance, NAT coordinates, ETOPS alternate weather, NOTAMs) to crew devices before departure.',
   'Fleet Tracking':           'Maintains satellite-position tracking across oceanic segments where radar coverage is absent, providing OCC with continuous accountability during ETOPS operations.',
   'Ops Manager':              'Manages the complex crew pairing and rest requirements for transoceanic extended operations, including augmented crew scheduling and international layover compliance.',
   'Jeppesen Runway Analysis': 'Provides certified performance analysis for ETOPS alternate airports worldwide, ensuring every extended-range dispatch is supported by current runway condition and obstacle data.'
@@ -938,14 +984,14 @@ VALUE_PROPS['Transoceanic / ETOPS'] = {
 
 // ── Business Aviation VALUE_PROPS ─────────────────────────────────────────────
 VALUE_PROPS['Part 91 Owner / Operator'] = {
-  'ForeFlight Business Pro':         'Gives owner-operators a complete preflight and in-flight planning platform — current charts, weather, logbook, weight & balance — in a single iPad app that fits the pace of personal aircraft operations.',
+  'ForeFlight Business Pro':         'Gives owner-operators a complete preflight and in-flight planning platform (current charts, weather, logbook, weight & balance) in a single iPad app that fits the pace of personal aircraft operations.',
   'ForeFlight Business Performance': 'Provides owner-operators with accurate V-speed and runway performance calculations based on actual weight, temperature, and field conditions, replacing conservative pilot estimates with certified data.',
   'FD Pro':                          'Delivers professional-grade flight planning with fuel optimization, ETOPS routing, and alternate analysis for owner-operators who fly complex or international itineraries on personal aircraft.',
   'Sentry':                          'Provides ADS-B traffic and weather datalink in the cockpit for owner-operators without panel-mounted ADS-B receivers, enabling full ForeFlight situational awareness on any aircraft.',
   'Jeppesen NavData':                'Keeps FMS or GPS nav databases current on the 28-day AIRAC cycle for privately operated aircraft, preventing nav alerts on IFR departure clearances.',
   'Onboard Performance Tool':        'Enables owner-operators to calculate precise takeoff and landing performance for any runway and conditions, ensuring safety and regulatory compliance on every weight-critical departure.',
   'TAAM':                            'Supports personal flight departments with airspace modeling for complex international trips or restricted airspace coordination on high-value owner itineraries.',
-  'ForeFlight Runway Analysis':      'Provides Part 91 operators with certified runway analysis reports for demanding airports — short strips, high-elevation fields, contaminated runways — ensuring every departure is backed by approved performance data.',
+  'ForeFlight Runway Analysis':      'Provides Part 91 operators with certified runway analysis reports for demanding airports (short strips, high-elevation fields, contaminated runways) ensuring every departure is backed by approved performance data.',
   'ForeFlight Dispatch':             'Offers owner-operators and their schedulers a streamlined pre-flight release workflow integrating weather, NOTAM, and routing review for personally managed aircraft operations.',
   'Fleet Tracking':                  'Gives personal flight department staff real-time visibility into owner-operated aircraft, supporting trip coordination and ground service provider notification.',
   'Ops Manager':                     'Manages scheduling, maintenance coordination, and crew assignments for owner-operated aircraft, reducing administrative burden on personal flight departments.'
@@ -953,7 +999,7 @@ VALUE_PROPS['Part 91 Owner / Operator'] = {
 VALUE_PROPS['Part 91K Fractional'] = {
   'ForeFlight Business Pro':         'Standardizes preflight planning and chart access across fractional owner devices, ensuring consistent situational awareness regardless of which shared aircraft the crew flies that day.',
   'ForeFlight Business Performance': 'Provides fractional crews with accurate performance data across the diverse pool of shared aircraft, covering weight-and-balance and runway limits for multiple airframe types.',
-  'FD Pro':                          'Handles complex fractional trip planning — multi-leg routing with fuel stops and alternates — matched to the flexible, on-demand nature of fractional owner itineraries.',
+  'FD Pro':                          'Handles complex fractional trip planning (multi-leg routing with fuel stops and alternates) matched to the flexible, on-demand nature of fractional owner itineraries.',
   'Sentry':                          'Provides ADS-B traffic and weather datalink across the fractional fleet without requiring panel modifications to every aircraft in the shared pool.',
   'Jeppesen NavData':                'Maintains synchronized FMS nav databases across the fractional fleet pool, ensuring any shared aircraft is departure-ready regardless of which owner has requested it.',
   'Onboard Performance Tool':        'Enables consistent performance calculations across the fractional fleet regardless of aircraft type, supporting safe dispatch for diverse owner mission profiles.',
@@ -961,7 +1007,7 @@ VALUE_PROPS['Part 91K Fractional'] = {
   'ForeFlight Runway Analysis':      'Provides fractional crews with certified performance data for challenging owner-requested destinations, ensuring Part 91K dispatch decisions are backed by approved runway analysis.',
   'ForeFlight Dispatch':             'Streamlines fractional trip release with integrated pre-departure review tools matched to the fast-turn, on-demand nature of fractional owner requests.',
   'Fleet Tracking':                  'Gives fractional program managers real-time visibility into all aircraft in the shared pool, supporting positioning decisions and owner trip scheduling across the fleet.',
-  'Ops Manager':                     'Manages the complex crew and aircraft scheduling demands of a fractional ownership program — crew availability, maintenance windows, owner demand peaks — on a single platform.'
+  'Ops Manager':                     'Manages the complex crew and aircraft scheduling demands of a fractional ownership program (crew availability, maintenance windows, owner demand peaks) on a single platform.'
 };
 VALUE_PROPS['Part 135 On-Demand Charter'] = {
   'ForeFlight Business Pro':         'Equips charter crews with an all-in-one preflight platform for any on-demand destination globally, supporting rapid departure preparation when client itineraries change at short notice.',
@@ -971,7 +1017,7 @@ VALUE_PROPS['Part 135 On-Demand Charter'] = {
   'Jeppesen NavData':                'Keeps FMS nav databases current for Part 135 charter operations where irregular destinations require accurate and current routing data for IFR clearances.',
   'Onboard Performance Tool':        'Automates Part 135-compliant takeoff and landing performance calculations, ensuring crews meet weight and performance limitations for any client-requested destination under any conditions.',
   'TAAM':                            'Supports charter operator planning for slot-constrained destinations and international airspace access, helping assess feasibility for unusual client itinerary requests.',
-  'ForeFlight Runway Analysis':      'Provides Part 135 operators with certified runway analysis for challenging charter destinations — private strips, international airports, contaminated runways — ensuring legal and safe dispatch authorization.',
+  'ForeFlight Runway Analysis':      'Provides Part 135 operators with certified runway analysis for challenging charter destinations (private strips, international airports, contaminated runways) ensuring legal and safe dispatch authorization.',
   'ForeFlight Dispatch':             'Enables Part 135 operators to complete weather, NOTAM, and release workflows efficiently for on-demand departures where clients expect minimum ground time.',
   'Fleet Tracking':                  'Provides charter operators real-time aircraft position visibility for scheduling and client communication, enabling accurate ETA reporting and positioning transparency.',
   'Ops Manager':                     'Manages charter crew scheduling, duty-time compliance, and aircraft availability for on-demand operations where last-minute requests require immediate crew and aircraft matching.'
@@ -987,12 +1033,12 @@ VALUE_PROPS['Part 135 Scheduled Service'] = {
   'ForeFlight Runway Analysis':      'Provides certified runway analysis for all Part 135 scheduled destinations, enabling dispatch to authorize departures with confidence when field conditions change seasonally.',
   'ForeFlight Dispatch':             'Streamlines scheduled Part 135 release with batch weather and NOTAM processing tools that scale efficiently to multi-aircraft, multi-departure operations.',
   'Fleet Tracking':                  'Gives scheduled operations control real-time fleet visibility, enabling proactive passenger notification and ground coordination for routine and irregular operations.',
-  'Ops Manager':                     'Manages crew pairing, duty scheduling, and maintenance availability for Part 135 scheduled operations — maintaining regulatory compliance while minimizing rotational inefficiency.'
+  'Ops Manager':                     'Manages crew pairing, duty scheduling, and maintenance availability for Part 135 scheduled operations, maintaining regulatory compliance while minimizing rotational inefficiency.'
 };
 VALUE_PROPS['Corporate Flight Department'] = {
-  'ForeFlight Business Pro':         'Gives corporate flight department crews a unified preflight platform for trips across the entire company network — domestic and international — with consistent chart access and weather planning.',
+  'ForeFlight Business Pro':         'Gives corporate flight department crews a unified preflight platform for trips across the entire company network (domestic and international) with consistent chart access and weather planning.',
   'ForeFlight Business Performance': 'Provides corporate crews with accurate V-speed and runway performance data for all aircraft in the department, ensuring every executive departure meets regulatory requirements.',
-  'FD Pro':                          'Handles complex corporate trip planning — multi-leg international routing, fuel planning, overflight permits — for executive travel where itinerary changes and last-minute requests are the norm.',
+  'FD Pro':                          'Handles complex corporate trip planning (multi-leg international routing, fuel planning, overflight permits) for executive travel where itinerary changes and last-minute requests are the norm.',
   'Sentry':                          'Equips corporate aircraft without panel ADS-B with ForeFlight weather and traffic datalink, extending modern situational awareness to the full flight department fleet.',
   'Jeppesen NavData':                'Keeps all corporate aircraft FMS databases on the standard 28-day update cycle, ensuring departure-ready status for any aircraft in the fleet when executive travel is requested.',
   'Onboard Performance Tool':        'Provides corporate flight departments with certified performance calculations for all aircraft types, supporting safe executive operations at challenging domestic and international destinations.',
@@ -1000,17 +1046,17 @@ VALUE_PROPS['Corporate Flight Department'] = {
   'ForeFlight Runway Analysis':      'Provides certified runway performance analysis for executive-requested destinations including private strips, international airports, and high-elevation fields common in corporate aviation.',
   'ForeFlight Dispatch':             'Streamlines corporate flight department trip release with integrated pre-departure weather, NOTAM, and filing tools that scale to small dispatcher teams serving large executive travel demand.',
   'Fleet Tracking':                  'Gives corporate flight department coordinators real-time aircraft visibility, enabling accurate passenger ETAs and ground transportation coordination for executive arrivals.',
-  'Ops Manager':                     'Manages corporate flight department scheduling — aircraft, crew, maintenance — on a single platform that handles the complexity of multi-aircraft departments serving high-priority executive travel.'
+  'Ops Manager':                     'Manages corporate flight department scheduling (aircraft, crew, maintenance) on a single platform that handles the complexity of multi-aircraft departments serving high-priority executive travel.'
 };
 VALUE_PROPS['High Net Worth Individual'] = {
-  'ForeFlight Business Pro':         'Gives owner-pilots and their crews an all-in-one platform for personal aviation — intuitive charts, weather, logbook, and filing — designed for sophisticated private operators who expect best-in-class tools.',
+  'ForeFlight Business Pro':         'Gives owner-pilots and their crews an all-in-one platform for personal aviation (intuitive charts, weather, logbook, and filing) designed for sophisticated private operators who expect best-in-class tools.',
   'ForeFlight Business Performance': 'Provides HNI owner-operators with precision performance calculations for their specific aircraft, ensuring safe departures from private strips and challenging destinations with complete professionalism.',
   'FD Pro':                          'Delivers professional-grade flight planning for personal aircraft operations, including international routing, fuel optimization, and permit filing for complex global trips.',
   'Sentry':                          'Provides ADS-B traffic and weather datalink for personal aircraft without ADS-B receivers, keeping the cockpit informed with ForeFlight-integrated data on every flight.',
   'Jeppesen NavData':                'Keeps nav databases current for personal aircraft with international range, ensuring FMS currency for spontaneous routing changes common in high-net-worth travel.',
   'Onboard Performance Tool':        'Delivers runway analysis for challenging private airstrips and destination airports, giving owner-operators and their crews data-backed confidence at demanding fields.',
   'TAAM':                            'Supports long-range travel planning for individuals who routinely operate into restricted, congested, or unusual international destinations requiring advance airspace coordination.',
-  'ForeFlight Runway Analysis':      'Provides certified runway analysis for private airstrips, international destinations, and unusual fields HNI operators frequently visit — ensuring professional-level safety compliance.',
+  'ForeFlight Runway Analysis':      'Provides certified runway analysis for private airstrips, international destinations, and unusual fields HNI operators frequently visit, ensuring professional-level safety compliance.',
   'ForeFlight Dispatch':             'Supports personal flight coordinators managing HNI travel with integrated weather, NOTAM, and pre-departure review tools that fit small personal flight operations.',
   'Fleet Tracking':                  'Gives personal flight coordinators and security teams real-time visibility into aircraft positions, supporting travel planning and ground logistics coordination.',
   'Ops Manager':                     'Manages crew scheduling and aircraft availability for complex multi-aircraft personal flight departments serving demanding principal travel schedules.'
@@ -1020,7 +1066,7 @@ VALUE_PROPS['Air Ambulance / HEMS'] = {
   'ForeFlight Business Performance': 'Provides HEMS operators with accurate performance calculations for weight-critical medical transport missions where patient equipment weight varies and runway options are limited.',
   'FD Pro':                          'Delivers flight planning for air ambulance routing across national and international coverage areas, with weather routing and alternate analysis for medical transport operations.',
   'Sentry':                          'Provides ADS-B weather and traffic datalink to medical aircraft cockpits, maintaining ForeFlight situational awareness in rotorwing and fixed-wing HEMS operations.',
-  'Jeppesen NavData':                'Keeps air ambulance FMS databases current for operations at the full range of medical destination airports — including small community hospitals and remote fields.',
+  'Jeppesen NavData':                'Keeps air ambulance FMS databases current for operations at the full range of medical destination airports, including small community hospitals and remote fields.',
   'Onboard Performance Tool':        'Calculates performance limits for medical transport departures from hospital helipads, challenging strip airports, and remote pickup locations with varying field conditions.',
   'TAAM':                            'Supports airspace coordination planning for HEMS operators managing complex flight corridors near urban medical centers, restricted areas, and TFRs.',
   'ForeFlight Runway Analysis':      'Provides certified performance data for HEMS destination airports including hospital helipads, remote strips, and unimproved fields common in medical transport operations.',
@@ -1031,12 +1077,12 @@ VALUE_PROPS['Air Ambulance / HEMS'] = {
 VALUE_PROPS['VIP / VVIP Transport'] = {
   'ForeFlight Business Pro':         'Provides VIP transport crews with a professional, polished planning platform for any global destination, ensuring impeccable chart currency and planning quality matching VVIP expectations.',
   'ForeFlight Business Performance': 'Delivers precise performance calculations for VVIP aircraft operating to private terminals, international destinations, and unusual airfields where standard performance data may not apply.',
-  'FD Pro':                          'Handles complex VVIP mission planning — spontaneous international routing, diplomatic overflight permits, fuel planning at non-IATA airports — with the reliability expected in head-of-state operations.',
+  'FD Pro':                          'Handles complex VVIP mission planning (spontaneous international routing, diplomatic overflight permits, fuel planning at non-IATA airports) with the reliability expected in head-of-state operations.',
   'Sentry':                          'Provides ADS-B traffic and weather datalink to VIP aircraft without hardware modifications, maintaining ForeFlight situational awareness during sensitive transport missions.',
   'Jeppesen NavData':                'Maintains FMS database currency for globally-capable VIP aircraft, ensuring routing flexibility for spontaneous destination changes standard in VVIP operations.',
   'Onboard Performance Tool':        'Provides certified performance analysis for VVIP destinations including private strips, congested international airports, and remote fields where mission success depends on precise payload margins.',
   'TAAM':                            'Supports advance mission planning for VVIP transport including airspace coordination, restricted zone analysis, and slot availability modeling at congested international gateways.',
-  'ForeFlight Runway Analysis':      'Provides certified runway analysis for the full range of VVIP destinations — private strips, head-of-state airports, and international fields — ensuring every mission departure is professionally authorized.',
+  'ForeFlight Runway Analysis':      'Provides certified runway analysis for the full range of VVIP destinations (private strips, head-of-state airports, and international fields) ensuring every mission departure is professionally authorized.',
   'ForeFlight Dispatch':             'Enables VVIP mission coordinators to conduct rapid, professional pre-departure releases integrating weather, NOTAM, and diplomatic routing data for time-sensitive departures.',
   'Fleet Tracking':                  'Gives VVIP operations coordinators and security teams real-time aircraft position tracking to support ground coordination, motorcade timing, and mission accountability.',
   'Ops Manager':                     'Manages VVIP transport crew scheduling, security clearance tracking, and aircraft availability for missions where crew assignment precision and discretion are non-negotiable requirements.'
@@ -2423,7 +2469,7 @@ function openDriveFolder(folderId, folderName) {
         setBrowserStatus(
           'No files returned. This usually means the folder is not fully public. ' +
           'In Google Drive, right-click the folder → Share → change to "Anyone with the link" → Done. ' +
-          'Then try again. If that still fails, run: python3 -m http.server 8080 and open http://localhost:8080 — ' +
+          'Then try again. If that still fails, run: python3 -m http.server 8080 and open http://localhost:8080, ' +
           'that unlocks full authenticated access.',
           'warn'
         );
@@ -2819,6 +2865,332 @@ function exportPDF() {
   pdfImg.src = dataUrl;
   // Fallback in case onload doesn't fire (some browsers cache data URLs)
   setTimeout(_doPrint, 400);
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// PRODUCT DESCRIPTIONS (what each product does — vertical-agnostic)
+// ─────────────────────────────────────────────────────────────────────────────
+var PROD_DESC = {
+  'MFB Pro':"ForeFlight Mobile is the world's leading electronic flight bag. At the Pro level it gives aircrews a moving map with georeferenced VFR and IFR charts and approach plates, Plates on Maps, synthetic vision, and live ADS-B and GPS traffic, weather, and attitude. It also includes a full safety suite, with Hazard Advisor terrain and obstacle alerting, airspace and terrain profile views, and icing and turbulence visualization, plus flight planning, weather briefing, filing, checklists, and a synced logbook. In the military context it runs on the same ForeFlight Mobile app aviators use worldwide, paired with military charting and data.",
+  'MFB Performance':"This tier includes everything in Pro and adds sharper planning and forecasting. It uses aircraft performance profiles for more accurate time and fuel calculations, handles fuel-load planning with automatic limit checks, and builds optimized routes for you. You also get 3D airport views, 3D flight preview and review, advanced weather-profile visualization, pre-departure clearances, D-ATIS, and integrated fuel pricing, so mission planners get a deeper look at performance and routing before they ever leave the ground.",
+  'MFB One':"MFB One is ForeFlight's all-in-one Military Flight Bag subscription, an EFB purpose-built for military missions that pulls flight planning, weather, briefing, filing, and checklists into one app. It bundles the Jeppesen Military Chart Service along with global DoD and FLIP charts, aerial-refueling track display, and military-specific mission tools. Those include Emergency Route Abort Altitude calculations, Time-on-Target coordinates, access to over 20 million worldwide U.S. DoD obstacles, and U.S. Air Force weather briefings for authorized users.",
+  'Jeppesen Military Charting Service':"This is Jeppesen's dedicated military charting solution, known as JMCS, serving U.S. Air Force, Navy, Marine Corps, Army, and Coast Guard crews. It provides the worldwide Jeppesen chart library in the familiar Jeppesen format, with global enroute charts plus IFR and VFR terminal charts. It also adds military-focused data like U.S. DoD obstacles, aerial-refueling tracks, avian hazards, and waypoint range rings, and it includes offline data bundles for limited or zero-connectivity environments. It comes as part of a mission-ready EFB package that works hand in hand with ForeFlight's Military Flight Bag.",
+  'Jeppesen NavData':"NavData is Jeppesen's flagship navigation database, marketed as the most complete and accurate aeronautical information available. Airlines, corporate flight departments, and major avionics manufacturers rely on it worldwide. Every 28-day AIRAC cycle, analysts review up to 47,000 pieces of source data from 195 countries and process roughly 600,000 database transactions. It comes in raw ARINC 424 or packed formats for practically any flight management system or simulator, backed by 24/7 expert support and companion airport-mapping, obstacle, terrain, and LPV databases.",
+  'FD Pro':"Jeppesen FliteDeck Pro is billed as the airline industry's first fully integrated electronic flight bag, letting pilots brief and navigate an entire flight inside one app. It combines database-driven Jeppesen charting with the operational flight plan and interactive navigation logging. You get worldwide enroute and terminal charts along with Smart Airport Maps, Airport Moving Maps for ground awareness, and an Enroute Intelligence Pack for traffic and weather. It also brings in-app NOTAMs, weather layers, cloud backup, and 24/7 support, and Jeppesen cites cruise-fuel savings of 1.5 to 2.0 percent.",
+  'Sentry':"Sentry is a portable ADS-B receiver that uAvionix designed exclusively for ForeFlight. It connects wirelessly to iPad and iPhone and feeds the app real-time flight data. You get dual-band ADS-B traffic, subscription-free FIS-B weather (animated NEXRAD, METARs, TAFs, and PIREPs) with weather replay, a WAAS multi-constellation GPS, a backup AHRS for attitude, a pressure-altitude sensor, and a built-in carbon-monoxide detector with alarm. Battery life runs about 18 hours.",
+  'Onboard Performance Tool':"OPT is a Boeing-developed app for iPad and Windows, originally distributed through Jeppesen, that lets flight crews and ground personnel run real-time takeoff and landing performance calculations in line with company and regulatory policy. It handles takeoff analysis, landing analysis, and weight and balance while accounting for current weather, runway conditions, pressure, engine bleeds, and any applicable MEL items. Aircraft-specific configuration files and performance databases from Boeing drive it, all in support of a paperless cockpit.",
+  'IL-5':"Impact Level 5, or IL-5, is the second-highest data-sensitivity tier for unclassified information under the DoD Cloud Computing Security Requirements Guide. It covers Controlled Unclassified Information (CUI) and certain unclassified National Security System data. An IL-5 offering builds on a FedRAMP High baseline with additional DoD FedRAMP+ and IL-5 separation controls, and DISA grants a Provisional Authorization so DoD components can use it without each running a full independent approval effort. Because ForeFlight and Jeppesen are hosted in a DISA-authorized IL-5 GovCloud environment, the platform can lawfully store and process CUI on DoD networks while inheriting that authorization, which spares individual units from having to obtain their own ATO or waiver.",
+  'ForeFlight Dispatch':"ForeFlight Dispatch is a web-based flight planning and operational control platform, and it sits at the center of ForeFlight's integrated suite. It lets dispatchers build, optimize, and file flight plans that account for the latest weather and each operator's own rules. It files globally against Jeppesen's worldwide database with ACK and REJ confirmation, and it ties together fuel optimization and tankering, runway analysis, weight and balance, flight tracking, and Jeppesen charts in one workflow. It also automates the routine dispatch tasks and keeps flight status synced in real time between the ops team and the pilots flying ForeFlight Mobile.",
+  'Jeppesen Dispatch':"Jeppesen Dispatch is the enterprise flight planning and dispatch piece of Jeppesen's airline operations suite. It's built to help airlines and large operators save fuel, time, and cost through planning workflows that scale, configure to the operation, and automate the busywork. Its fuel-efficient route optimization is designed to reduce disruption risk and improve on-time performance, and it works alongside other Jeppesen products like weather, weight and balance, OpsData, and fleet tracking. It's backed by dedicated global service, training, deployment, and 24/7 technical support.",
+  'Fleet Tracking':"Fleet Tracking is ForeFlight's real-time aircraft position and flight-status tracking, built right into ForeFlight Dispatch so planners can launch, track, and close flights without leaving the platform. It pairs cost-effective ground-based ADS-B for domestic coverage with space-based satellite ADS-B for worldwide visibility over oceans and remote areas. Positions show up in a map view that overlays planned routes and live weather, plus a profile view that charts groundspeed and altitude. That gives operators the context they need to get ahead of delays and disruptions across the whole fleet.",
+  'Ops Manager':"Ops Manager is ForeFlight's web-based admin and operations console for Business, Dispatch, and Military Flight Bag accounts, and it gives flight-department administrators one place to run their team and fleet. From there they manage users, pilots, and devices, publish and maintain aircraft profiles, link accounts, and push documents and content out to crews. Think of it as the operational backbone that keeps account settings, personnel, and aircraft data consistent across an organization's ForeFlight deployment.",
+  'Jeppesen Runway Analysis':"Delivered through the web-based OpsData platform, Jeppesen Runway Analysis works out the maximum allowable takeoff and landing weights so you can optimize payload while still meeting regulatory performance requirements. It produces aircraft- and runway-specific results using exact temperature, wind, and runway conditions, along with intersection and runway-length adjustments, temporary-obstacle data, and full terrain and obstacle accountability, plus Special Departure and Engine-Out Procedures. It covers more than 200 aircraft and engine combinations across roughly 3,700 airports worldwide, including wet and contaminated runway analysis.",
+  'FliteDeck Pro':"Jeppesen FliteDeck Pro is billed as the airline industry's first fully integrated electronic flight bag, letting pilots brief and navigate an entire flight inside one app. It combines database-driven Jeppesen charting with the operational flight plan and interactive navigation logging. You get worldwide enroute and terminal charts along with Smart Airport Maps, Airport Moving Maps for ground awareness, and an Enroute Intelligence Pack for traffic and weather. It also brings in-app NOTAMs, weather layers, cloud backup, and 24/7 support, and Jeppesen cites cruise-fuel savings of 1.5 to 2.0 percent.",
+  'Jeppesen Charts':"Jeppesen Charts is the company's worldwide library of digital and paper aviation charts, built on more than 90 years of experience and trusted by over a million pilots. It's meant to help crews spend more time flying and less time preparing, delivering up-to-date, accurate, detailed aeronautical data in customizable, easy-to-use formats with regular, reliable updates. You can get it through the traditional Airway Manual or digitally inside mobile apps like ForeFlight and Garmin Pilot.",
+  'TAAM':"TAAM, the Total Airspace and Airport Modeler from Jeppesen and Boeing, is a fast-time, gate-to-gate simulation tool that predicts and analyzes how present and future airspace and airport operations will play out. It models everything from gate usage, ground handling, deicing, and taxiing to runway utilization, SID departures, and enroute traffic flows. Integrated with Jeppesen's worldwide NavData and configurable to any airport or airspace, it works like a virtual laboratory for what-if analysis, airspace redesign and resectorization, capacity forecasting, procedure evaluation, and controller-workload assessment. Air navigation service providers, civil aviation authorities, airports, and airlines all use it.",
+  'Jeppesen Crew Briefing':"Jeppesen's crew briefing product, FliteBrief, is a new-generation crew briefing and flight-monitoring suite. It lets dispatchers build and hand out customized briefing packages to crews on the fly from a single flight-operations portal. It's modular, covering flight-dispatch briefing-pack generation, Airfield Watch weather monitoring, NOTAM Watch, GADSS-compliant flight tracking, and reporting and analytics. It also pairs with Jeppesen's Aviator EFB suite so digital briefings on the aircraft stay in sync with ground systems, and it supports digital journey-log recording.",
+  'ForeFlight Business Pro':"ForeFlight calls its Mobile app the number-one EFB for business aviation, and the Business Pro plan delivers that integrated EFB. You get a moving map, worldwide Jeppesen charts and aeronautical data, georeferenced approach and airport diagrams, synthetic vision, weather briefing and filing, and the Hazard Advisor safety suite. It acts as a central hub that connects pilots and dispatchers, with flight planning, flight tracking, and synced data across the whole flight department.",
+  'ForeFlight Business Performance':"The Business Performance plan includes everything in Business Pro and adds advanced performance and planning tools for turbine and jet operators. That means detailed aircraft performance profiles, weight and balance, and runway takeoff-and-landing performance analysis for precise, automated numbers. It also brings optimized worldwide flight planning, fuel optimization, and 3D preflight visualization to support demanding business-aviation operations from start to finish.",
+  'ForeFlight Runway Analysis':"ForeFlight Runway Analysis provides OEM-based, obstacle-accountable takeoff and landing performance calculations. It works out maximum allowable weights by comparing the aircraft's available performance for the given weather and pilot-selected configuration against runway length, terrain, and obstacles. It also finds the best obstacle-clearance engine-out procedures for an engine failure on takeoff, supports emergency-return analysis, and feeds its takeoff and landing weight results into weight and balance and flight planning. On top of that, it generates summary sheets that document each computation."
+};
+
+// ─────────────────────────────────────────────────────────────────────────────
+// GENERATE PRESENTATION (standalone HTML deck from proposed products + value props)
+// ─────────────────────────────────────────────────────────────────────────────
+var _presentProds = [];   // proposed products captured when the modal opens
+var _presentShots = {};   // keyed by index: {dataUri:'', none:false}
+
+function _proposedForPresent() {
+  var allProds = (STATE.prods.left||[]).concat(STATE.prods.right||[]);
+  var ddSelSet = {};
+  (STATE.ddSel||[]).forEach(function(d){ ddSelSet[d]=true; });
+  return allProds.filter(function(p){ return p.status==='prop' && !ddSelSet[p.name]; });
+}
+
+function openPresentModal() {
+  _presentProds = _proposedForPresent();
+  if (!_presentProds.length) {
+    alert('No proposed solutions to present.\n\nAdd products to the Solutions section (and leave them unchecked in Due Diligence) before generating a presentation.');
+    return;
+  }
+  _presentShots = {};
+  var list = document.getElementById('pm-list');
+  list.innerHTML = '';
+  _presentProds.forEach(function(p, i) {
+    _presentShots[i] = { dataUri:'', none:false };
+    var row = document.createElement('div');
+    row.className = 'pm-row';
+    row.id = 'pm-row-'+i;
+    row.innerHTML =
+      '<img class="pm-thumb" id="pm-thumb-'+i+'">'+
+      '<div class="pm-name">'+p.name.replace(/</g,'&lt;')+'</div>'+
+      '<label class="pm-upload" id="pm-up-'+i+'"><span id="pm-uplbl-'+i+'">&#128247; Upload</span>'+
+        '<input type="file" accept="image/*" style="display:none" onchange="onPresentShotChosen(this,'+i+')"></label>'+
+      '<label class="pm-noshot"><input type="checkbox" id="pm-none-'+i+'" onchange="togglePresentNoShot('+i+',this.checked)">No screenshot</label>';
+    list.appendChild(row);
+  });
+  var allNone = document.getElementById('pm-all-none'); if (allNone) allNone.checked = false;
+  document.getElementById('present-modal').classList.add('open');
+}
+
+function closePresentModal() {
+  document.getElementById('present-modal').classList.remove('open');
+}
+
+function onPresentShotChosen(input, i) {
+  var file = input.files && input.files[0];
+  if (!file) return;
+  var reader = new FileReader();
+  reader.onload = function(e) {
+    var img = new Image();
+    img.onload = function() {
+      // Downscale wide screenshots to keep the file size reasonable
+      var maxW = 1600;
+      var scale = img.naturalWidth > maxW ? maxW / img.naturalWidth : 1;
+      var w = Math.round(img.naturalWidth * scale), h = Math.round(img.naturalHeight * scale);
+      var c = document.createElement('canvas'); c.width = w; c.height = h;
+      c.getContext('2d').drawImage(img, 0, 0, w, h);
+      var dataUri;
+      try { dataUri = c.toDataURL('image/jpeg', 0.9); }
+      catch(err) { dataUri = e.target.result; }
+      _presentShots[i].dataUri = dataUri;
+      _presentShots[i].none = false;
+      var thumb = document.getElementById('pm-thumb-'+i);
+      thumb.src = dataUri; thumb.classList.add('show');
+      document.getElementById('pm-up-'+i).classList.add('has');
+      document.getElementById('pm-uplbl-'+i).innerHTML = '&#10003; Replace';
+      var noneCb = document.getElementById('pm-none-'+i); if (noneCb) noneCb.checked = false;
+      document.getElementById('pm-row-'+i).classList.remove('noshot');
+    };
+    img.src = e.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+
+function togglePresentNoShot(i, checked) {
+  _presentShots[i].none = checked;
+  var row = document.getElementById('pm-row-'+i);
+  if (checked) {
+    row.classList.add('noshot');
+    _presentShots[i].dataUri = '';
+    var thumb = document.getElementById('pm-thumb-'+i); thumb.src=''; thumb.classList.remove('show');
+    document.getElementById('pm-up-'+i).classList.remove('has');
+    document.getElementById('pm-uplbl-'+i).innerHTML = '&#128247; Upload';
+  } else {
+    row.classList.remove('noshot');
+  }
+}
+
+function toggleAllNoShot(checked) {
+  _presentProds.forEach(function(p, i) {
+    var cb = document.getElementById('pm-none-'+i);
+    if (cb) { cb.checked = checked; togglePresentNoShot(i, checked); }
+  });
+}
+
+function confirmGeneratePresentation() {
+  // Map index-keyed choices to product-name-keyed shots for the builder
+  var shotsByName = {};
+  _presentProds.forEach(function(p, i) {
+    shotsByName[p.name] = _presentShots[i] || {};
+  });
+  var doc = buildPresentationHTML(shotsByName);
+  if (!doc) return;
+  closePresentModal();
+  var customer = STATE.unit || 'Customer';
+  var blob = new Blob([doc], {type:'text/html'});
+  var url  = URL.createObjectURL(blob);
+  var a    = document.createElement('a');
+  a.download = 'Briefing_'+customer.replace(/[^a-z0-9]+/gi,'_')+'_'+new Date().toISOString().slice(0,10)+'.html';
+  a.href = url;
+  a.click();
+  setTimeout(function(){ URL.revokeObjectURL(url); }, 4000);
+}
+
+function buildPresentationHTML(shots) {
+  shots = shots || {};
+  var esc = function(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); };
+
+  var mission   = STATE.missionVP || STATE.mission || '';
+  var allProds  = (STATE.prods.left||[]).concat(STATE.prods.right||[]);
+  var ddSelSet  = {};
+  (STATE.ddSel||[]).forEach(function(d){ ddSelSet[d]=true; });
+  var proposed  = allProds.filter(function(p){ return p.status==='prop' && !ddSelSet[p.name]; });
+
+  if (!proposed.length) {
+    alert('No proposed solutions to present.\n\nAdd products to the Solutions section (and leave them unchecked in Due Diligence) before generating a presentation.');
+    return null;
+  }
+
+  var cfg      = VERTICAL_CONFIGS[STATE.vertical] || VERTICAL_CONFIGS.MA;
+  var customer = STATE.unit || 'Customer';
+  var dateStr  = new Date().toLocaleDateString('en-US',{year:'numeric',month:'long',day:'numeric'});
+  var seName   = (function(){ try{ return localStorage.getItem('cap_se_v1')||''; }catch(e){ return ''; } })();
+  var crest    = (function(){ try{ return localStorage.getItem(CREST_KEY)||''; }catch(e){ return ''; } })();
+
+  // Subtitle line under the customer name
+  var subParts = [];
+  if (mission)        subParts.push(mission);
+  if (STATE.org)      subParts.push(STATE.org);
+  if (STATE.part)     subParts.push(STATE.part);
+  var subLine = subParts.join('  ·  ');
+
+  // Agenda items = each proposed product + Summary
+  var agenda = proposed.map(function(p,i){
+    var n = ('0'+(i+1)).slice(-2);
+    return '<li><span class="agenda-num">'+n+'</span>'+esc(p.name)+'</li>';
+  }).join('');
+  agenda += '<li><span class="agenda-num">'+('0'+(proposed.length+1)).slice(-2)+'</span>Summary &amp; Next Steps</li>';
+
+  // Nav links
+  var navLinks = proposed.map(function(p,i){
+    return '<a href="#p'+i+'" class="link">'+esc(p.name)+'</a>';
+  }).join('') + '<a href="#summary" class="link">Summary</a>';
+
+  // Product sections (alternating text side)
+  var sections = proposed.map(function(p,i){
+    var side  = (i%2===0) ? 'right' : 'left';
+    var desc  = PROD_DESC[p.name] || 'A Jeppesen ForeFlight solution proposed for '+customer+'.';
+    var vp    = getVP(p.name, mission) || '';
+    var num   = ('0'+(i+1)).slice(-2);
+    var opt   = shots[p.name] || {};
+    var vpBlock = vp
+      ? '<div class="subhead">Why it matters for '+esc(customer)+'</div><p class="lead">'+esc(vp)+'</p>'
+      : '';
+    var textCol =
+      '<div class="eyebrow">Proposed Solution '+num+'</div>'+
+      '<h2 class="headline">'+esc(p.name)+'</h2>'+
+      '<div class="subhead">What is it?</div>'+
+      '<p class="lead">'+esc(desc)+'</p>'+
+      vpBlock;
+
+    // Full-width text slide (no screenshot)
+    if (opt.none) {
+      return '<section class="panel content full" id="p'+i+'"><div class="wrap-full reveal">'+textCol+'</div></section>';
+    }
+    // Media column: uploaded screenshot, or placeholder
+    var media = opt.dataUri
+      ? '<img src="'+opt.dataUri+'" alt="'+esc(p.name)+' screenshot" style="border-radius:9px;width:100%;display:block">'
+      : '<div class="shot-ph"><div class="shot-ph-icon">&#128247;</div><div class="shot-ph-name">'+esc(p.name)+'</div><div class="shot-ph-sub">Product screenshot</div></div>';
+    return ''+
+    '<section class="panel content '+side+'" id="p'+i+'"><div class="grid2">'+
+      '<div class="col-text reveal">'+textCol+'</div>'+
+      '<div class="col-media reveal"><div class="media-card"><div class="media-glow"></div>'+media+'</div></div>'+
+    '</div></section>';
+  }).join('\n');
+
+  // Summary ecosystem chips
+  var chips = proposed.map(function(p){ return '<span>'+esc(p.name)+'</span>'; }).join('');
+
+  var heroCrest = crest ? '<img src="'+crest+'" alt="crest" style="height:64px;width:auto;margin-bottom:22px;display:block">' : '';
+
+  var doc =
+'<!DOCTYPE html><html lang="en"><head>'+
+'<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">'+
+'<title>'+esc(customer)+': Solution Briefing | Jeppesen ForeFlight</title>'+
+'<style>'+
+':root{--navy:#001629;--navy2:#06223b;--white:#fff;--orange:#FF791A;--teal:#19A2AE;--cyan:#6AF4F9;--cream:#F3EDE2;--muted:#9fb3c6;}'+
+'*{box-sizing:border-box;margin:0;padding:0}html{scroll-behavior:smooth}'+
+'body{font-family:"Inter",system-ui,-apple-system,sans-serif;background:var(--navy);color:var(--white);overflow-x:hidden;-webkit-font-smoothing:antialiased;line-height:1.5}'+
+'img,svg{display:block;max-width:100%}a{color:inherit;text-decoration:none}'+
+'#progress{position:fixed;top:0;left:0;height:3px;background:linear-gradient(90deg,var(--orange),var(--cyan));width:0;z-index:100}'+
+'nav.topnav{position:fixed;top:0;left:0;right:0;z-index:90;display:flex;align-items:center;gap:8px;padding:14px 26px;background:rgba(0,12,22,.55);backdrop-filter:blur(10px);border-bottom:1px solid rgba(255,255,255,.07);transform:translateY(-100%);transition:transform .4s ease}'+
+'nav.topnav.show{transform:translateY(0)}'+
+'nav.topnav .logo{font-weight:800;letter-spacing:.5px;margin-right:auto;font-size:15px}nav.topnav .logo b{color:var(--orange)}'+
+'nav.topnav a.link{color:var(--muted);font-size:12.5px;font-weight:600;padding:6px 10px;border-radius:6px;white-space:nowrap;transition:.2s}'+
+'nav.topnav a.link:hover{color:#fff;background:rgba(255,255,255,.08)}'+
+'@media(max-width:1100px){nav.topnav .links{display:none}}'+
+'.panel{position:relative;padding:96px 7vw}'+
+'.eyebrow{color:var(--orange);font-weight:700;font-size:clamp(13px,1.3vw,16px);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:14px}'+
+'.headline{font-weight:800;font-size:clamp(28px,3.6vw,46px);line-height:1.08;letter-spacing:-.5px}'+
+'.lead{color:var(--cream);font-size:clamp(16px,1.4vw,20px);margin:14px 0 22px;max-width:52ch;font-weight:500}'+
+'.lead.center{margin-left:auto;margin-right:auto;text-align:center}'+
+'.subhead{color:var(--cyan);font-weight:700;text-transform:uppercase;letter-spacing:1px;font-size:13px;margin:18px 0 4px}'+
+'.hero{min-height:100vh;display:flex;align-items:center;padding-top:120px;overflow:hidden}'+
+'.hero-bg{position:absolute;inset:-12% 0;background-size:cover;background-position:center;z-index:0}'+
+'.hero-scrim{position:absolute;inset:0;z-index:1;background:linear-gradient(105deg,var(--navy) 30%,rgba(0,22,41,.82) 55%,rgba(0,22,41,.45) 100%)}'+
+'.hero-inner{position:relative;z-index:2;max-width:980px}'+
+'.hero-brand{font-weight:800;color:#fff;font-size:clamp(16px,1.7vw,22px);margin-bottom:18px;opacity:.9}'+
+'.hero-title{font-weight:900;font-size:clamp(40px,7vw,96px);line-height:.99;letter-spacing:-2px}'+
+'.hero-sub{color:var(--orange);font-weight:700;font-size:clamp(16px,1.7vw,24px);margin-top:22px;max-width:44ch}'+
+'.pills{display:flex;gap:10px;margin-top:34px;flex-wrap:wrap}'+
+'.pills span{border:1px solid rgba(255,255,255,.35);color:#dce8f2;border-radius:30px;padding:7px 16px;font-size:12px;font-weight:600;letter-spacing:1px;text-transform:uppercase}'+
+'.scroll-cue{margin-top:40px;color:var(--muted);font-size:13px;letter-spacing:2px;text-transform:uppercase}'+
+'.scroll-cue span{display:inline-block;animation:bounce 1.6s infinite;margin-left:6px;color:var(--orange)}'+
+'@keyframes bounce{0%,100%{transform:translateY(0)}50%{transform:translateY(6px)}}'+
+'.divider{min-height:70vh;display:flex;align-items:center;overflow:hidden}'+
+'.divider-bg{position:absolute;inset:-12% 0;background-size:cover;z-index:0}'+
+'.divider-scrim{position:absolute;inset:0;z-index:1;background:radial-gradient(120% 100% at 20% 50%,rgba(0,22,41,.55),rgba(0,22,41,.93))}'+
+'.divider-inner{position:relative;z-index:2;max-width:1100px}'+
+'.divider-num{font-weight:900;font-size:clamp(60px,12vw,170px);color:rgba(255,121,26,.18);line-height:.8;letter-spacing:-4px;margin-bottom:-10px}'+
+'.divider-title{font-weight:900;font-size:clamp(36px,7vw,90px);line-height:1;letter-spacing:-1.5px}'+
+'.divider-sub{color:var(--cream);font-size:clamp(16px,1.6vw,22px);margin-top:20px;max-width:52ch}'+
+'.grid2{display:grid;grid-template-columns:1fr 1fr;gap:clamp(30px,5vw,80px);align-items:center;max-width:1500px;margin:0 auto}'+
+'@media(max-width:880px){.grid2{grid-template-columns:1fr}.panel{padding:72px 7vw}}'+
+'.media-card{position:relative;border-radius:16px;padding:14px;background:linear-gradient(160deg,rgba(255,255,255,.07),rgba(255,255,255,.02));border:1px solid rgba(255,255,255,.12);box-shadow:0 30px 70px -30px rgba(0,0,0,.8);overflow:hidden}'+
+'.media-glow{position:absolute;width:60%;height:60%;top:-20%;right:-15%;background:radial-gradient(circle,rgba(255,121,26,.35),transparent 70%);filter:blur(40px);z-index:0}'+
+'.content.left .grid2 .col-media{order:-1}'+
+'.content.full .wrap-full{max-width:1100px;margin:0 auto}'+
+'.content.full .lead{max-width:72ch}'+
+'.shot-ph{position:relative;z-index:1;border:2px dashed rgba(255,255,255,.22);border-radius:10px;background:rgba(255,255,255,.03);min-height:300px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:30px}'+
+'.shot-ph-icon{font-size:44px;opacity:.5;margin-bottom:14px}'+
+'.shot-ph-name{font-weight:800;font-size:18px;color:#fff;letter-spacing:.3px}'+
+'.shot-ph-sub{color:var(--muted);font-size:12px;letter-spacing:1.5px;text-transform:uppercase;margin-top:6px}'+
+'.agenda .wrap{max-width:1100px;margin:0 auto}'+
+'.agenda-list{list-style:none;margin-top:30px;display:grid;grid-template-columns:1fr 1fr;gap:14px 44px}'+
+'@media(max-width:760px){.agenda-list{grid-template-columns:1fr}}'+
+'.agenda-list li{display:flex;align-items:center;gap:18px;font-size:clamp(16px,1.8vw,23px);font-weight:700;padding:16px 0;border-bottom:1px solid rgba(255,255,255,.1)}'+
+'.agenda-num{color:var(--orange);font-weight:900;font-size:.8em;font-variant-numeric:tabular-nums}'+
+'.summary .wrap{max-width:1150px;margin:0 auto}'+
+'.eco{margin-top:36px}'+
+'.eco-cat{color:var(--cyan);font-weight:800;letter-spacing:1.5px;font-size:12.5px;text-transform:uppercase;margin-bottom:16px}'+
+'.eco-chips{display:flex;flex-wrap:wrap;gap:10px}'+
+'.eco-chips span{background:rgba(255,121,26,.13);border:1px solid rgba(255,121,26,.35);color:#ffd9bb;border-radius:8px;padding:9px 15px;font-size:14px;font-weight:600}'+
+'footer{padding:50px 7vw;border-top:1px solid rgba(255,255,255,.1);display:flex;justify-content:space-between;flex-wrap:wrap;gap:14px;color:var(--muted);font-size:13px}'+
+'footer b{color:#fff}'+
+'.panel.content:nth-of-type(even){background:linear-gradient(180deg,var(--navy),#02192e)}'+
+'.reveal{opacity:0;transform:translateY(34px);transition:opacity .8s ease,transform .8s ease}.reveal.in{opacity:1;transform:none}'+
+'</style></head><body>'+
+'<div id="progress"></div>'+
+'<nav class="topnav" id="topnav"><a href="#top" class="logo">Jeppesen <b>ForeFlight</b></a><div class="links">'+navLinks+'</div></nav>'+
+'<section class="panel hero" id="top">'+
+  '<div class="hero-bg" style="background:repeating-radial-gradient(circle at 75% 30%, rgba(255,255,255,.045) 0 1px, transparent 1px 78px), radial-gradient(140% 120% at 15% 20%, rgba(25,162,174,.32), transparent 55%), radial-gradient(120% 100% at 85% 80%, rgba(255,121,26,.24), transparent 60%), linear-gradient(160deg,#001629,#06223b 55%,#001629)"></div>'+
+  '<div class="hero-scrim"></div>'+
+  '<div class="hero-inner reveal">'+
+    heroCrest+
+    '<div class="eyebrow">'+esc(customer)+'&nbsp;|&nbsp; Solution Briefing</div>'+
+    '<div class="hero-brand">Jeppesen ForeFlight</div>'+
+    '<h1 class="hero-title">'+esc(customer)+'</h1>'+
+    (subLine ? '<div class="hero-sub">'+esc(subLine)+'</div>' : '')+
+    '<div class="pills"><span>'+esc(cfg.name)+'</span><span>Proposed Solutions</span></div>'+
+    '<div class="scroll-cue">Scroll <span>&#8595;</span></div>'+
+  '</div>'+
+'</section>'+
+'<section class="panel agenda"><div class="wrap reveal"><div class="eyebrow">What we\'ll cover</div><h2 class="headline">Agenda</h2><ol class="agenda-list">'+agenda+'</ol></div></section>'+
+'<section class="panel divider" id="solutions">'+
+  '<div class="divider-bg" style="background:repeating-radial-gradient(circle at 20% 70%, rgba(255,255,255,.04) 0 1px, transparent 1px 80px), radial-gradient(130% 110% at 80% 25%, rgba(106,244,249,.2), transparent 55%), radial-gradient(120% 100% at 20% 85%, rgba(255,121,26,.26), transparent 60%), linear-gradient(160deg,#06223b,#001629 60%,#001629)"></div>'+
+  '<div class="divider-scrim"></div>'+
+  '<div class="divider-inner reveal"><div class="divider-num">01</div><div class="eyebrow">Recommended for '+esc(customer)+'</div><h2 class="divider-title">Proposed Solutions</h2><div class="divider-sub">A tailored set of Jeppesen ForeFlight capabilities'+(mission?' for '+esc(mission)+' operations':'')+'.</div></div>'+
+'</section>'+
+sections+
+'<section class="panel summary" id="summary"><div class="wrap reveal"><div class="eyebrow">Bringing it together</div><h2 class="headline">One integrated ecosystem</h2><p class="lead">Every proposed solution shares one synchronized source of data, from the flight deck to operations control.</p><div class="eco"><div class="eco-cat">Proposed for '+esc(customer)+'</div><div class="eco-chips">'+chips+'</div></div></div></section>'+
+'<footer><div><b>Jeppesen ForeFlight</b>'+(seName?' &nbsp;·&nbsp; Prepared by '+esc(seName):'')+'</div><div>'+esc(dateStr)+'</div></footer>'+
+'<script>'+
+'(function(){'+
+'var prog=document.getElementById("progress"),nav=document.getElementById("topnav");'+
+'function onScroll(){var h=document.documentElement,st=h.scrollTop||document.body.scrollTop,sh=(h.scrollHeight-h.clientHeight)||1;prog.style.width=(st/sh*100)+"%";if(st>560)nav.classList.add("show");else nav.classList.remove("show");}'+
+'window.addEventListener("scroll",onScroll,{passive:true});onScroll();'+
+'var reveals=[].slice.call(document.querySelectorAll(".reveal"));'+
+'function show(el){el.classList.add("in");}'+
+'function inView(el){var r=el.getBoundingClientRect();return r.top<(window.innerHeight||document.documentElement.clientHeight)*0.92&&r.bottom>0;}'+
+'if("IntersectionObserver" in window){var io=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){show(e.target);io.unobserve(e.target);}});},{threshold:0.12});reveals.forEach(function(el){io.observe(el);});}else{reveals.forEach(show);}'+
+'reveals.forEach(function(el){if(inView(el))show(el);});'+
+'setTimeout(function(){reveals.forEach(show);},1600);'+
+'})();'+
+'<\/script>'+
+'</body></html>';
+
+  return doc;
 }
 
 // ─────────────────────────────────────────────────────────────────────────────

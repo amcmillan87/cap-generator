@@ -1088,6 +1088,44 @@ VALUE_PROPS['VIP / VVIP Transport'] = {
   'Ops Manager':                     'Manages VVIP transport crew scheduling, security clearance tracking, and aircraft availability for missions where crew assignment precision and discretion are non-negotiable requirements.'
 };
 
+// ── FRAT value props (Flight Risk Assessment Tool) across MA + BA mission types ──
+(function(){
+  var FRAT_VPS = {
+    'General Reseller (Manned)':"FRAT gives resellers a safety product that applies to every manned operator regardless of airframe or mission, since a documented, repeatable risk-assessment process is something every flight organization needs and few run consistently. It opens an easy, high-value conversation around standardizing go/no-go decisions and giving leadership fleet-wide risk visibility.",
+    'Training Command':"Training units run high sortie volumes with students at the controls, which makes a consistent, enforced risk-assessment process especially valuable for catching elevated-risk flights before they launch. FRAT standardizes go/no-go scoring across every instructor and student, requires written mitigation on high-risk sorties, and gives the safety office fleet-wide visibility into recurring hazards in the syllabus.",
+    'OSA (Operational Support Airlift)':"OSA missions mix short-notice tasking, varied crews, and destinations that range from major airfields to unfamiliar civil strips, all of which push flight risk up. FRAT standardizes the pre-flight risk picture across every sortie, auto-scoring weather and route data and forcing documented mitigation before high-risk flights, so ops leadership can approve short-notice missions with confidence.",
+    'ISR':"ISR missions are defined by long-duration sorties, dynamic retasking, marginal weather, and austere operating areas, all of which raise risk across a single flight. FRAT gives ISR units a standardized way to score and mitigate that risk before launch, auto-scoring live weather and route data, enforcing written mitigation on high-risk sorties, and rolling up fleet-wide risk trends for leadership.",
+    'Air Transport / Airlift':"Airlift crews fly long stage lengths into a wide variety of fields under fatigue and crew-rotation pressure, making a consistent risk-assessment process critical to safe dispatch. FRAT standardizes risk scoring across the fleet, auto-scores weather and route factors, and enforces mitigation and safety-office notification on high-risk missions.",
+    'Special Operations':"SOF missions routinely operate at night, low-level, into unimproved sites, and under compressed planning timelines, which stacks multiple risk factors on a single sortie. FRAT captures that elevated risk in a repeatable score, forces documented mitigation before launch, and gives the safety chain visibility without slowing the mission-planning tempo.",
+    'Combat Search & Rescue (CSAR)':"CSAR launches are time-critical and often into degraded weather, hostile areas, and demanding terrain, so a fast but rigorous risk assessment is essential. FRAT gives crews a standardized way to score and mitigate that risk quickly, auto-pulling weather and route data and flagging high-risk launches for mandatory mitigation and safety notification.",
+    'Aerial Refueling / Tanker':"Tanker operations involve long-duration sorties, complex airspace coordination, and demanding join-up and offload procedures, all of which factor into flight risk. FRAT standardizes pre-flight risk scoring across the fleet and enforces documented mitigation on high-risk missions, giving ops leadership consistent visibility across every tanker sortie.",
+    'Maritime Patrol':"Maritime patrol crews fly long over-water sorties into rapidly changing weather far from divert options, raising risk across the mission profile. FRAT auto-scores weather and route factors, standardizes the go/no-go decision, and enforces mitigation and safety-office notification before high-risk patrols launch.",
+    'MEDEVAC':"MEDEVAC launches are urgent, weather-driven, and often into unprepared landing sites, exactly the environment where rushed go/no-go decisions raise risk. FRAT gives crews a fast, standardized risk score with auto-pulled weather, forces written mitigation on high-risk launches, and gives the safety office a documented record of every decision.",
+    'VIP / Executive Transport':"VIP transport carries schedule pressure and high-visibility passengers into a wide range of airports, which can quietly push crews toward accepting elevated risk. FRAT standardizes the risk assessment for every sortie, auto-scores weather and route data, and requires documented mitigation so schedule pressure never overrides a sound go/no-go call.",
+    'Close Air Support (CAS)':"CAS sorties combine dynamic tasking, low-altitude work, and demanding weather and terrain, stacking risk factors on a single flight. FRAT captures that in a repeatable pre-flight score, enforces mitigation on high-risk missions, and gives the safety chain fleet-wide visibility without adding planning burden.",
+    'Electronic Warfare':"EW missions run long-duration sorties in complex, congested airspace with specialized crew workloads, all of which contribute to flight risk. FRAT standardizes the pre-flight risk picture, auto-scores weather and route factors, and enforces documented mitigation and safety notification on high-risk sorties.",
+    'Test & Evaluation':"T&E flights deliberately explore the edges of the envelope and unusual configurations, making disciplined, documented risk assessment central to the mission. FRAT gives test units a configurable risk matrix, enforces written mitigation on high-risk test points, and produces a fleet-wide record that supports the safety review process.",
+    'Attack / Strike':"Strike sorties combine dynamic tasking, weapons employment, low-altitude work, and demanding weather, which stacks multiple risk factors per flight. FRAT scores that risk consistently before launch, forces documented mitigation on high-risk missions, and gives leadership visibility into recurring hazards across the fleet.",
+    'Logistics / Cargo':"Cargo missions fly long stage lengths into varied and sometimes austere fields under crew-duty and schedule pressure, all of which raise risk. FRAT standardizes risk scoring across every sortie, auto-scores weather and route factors, and enforces mitigation and safety-office notification on high-risk flights.",
+    'General Reseller (UAS)':"FRAT is an easy add for any UAS operator because BVLOS and airspace-integrated operations draw heightened safety and regulatory scrutiny, and a documented risk-assessment process directly supports that. It gives resellers a value story around standardized go/no-go decisions and fleet-wide risk visibility that applies across every unmanned program.",
+    'UAS ISR / Reconnaissance':"Long-endurance ISR UAS missions involve extended sorties, dynamic retasking, and BVLOS airspace coordination, all of which carry risk that is easy to under-assess informally. FRAT standardizes the pre-flight risk score, auto-scores weather and route factors, and enforces documented mitigation before high-risk sorties launch.",
+    'UAS Strike':"Strike UAS sorties combine weapons employment, dynamic tasking, and BVLOS operations in complex airspace, stacking risk factors that warrant a rigorous, repeatable assessment. FRAT scores that risk before launch, forces documented mitigation on high-risk missions, and gives the safety chain fleet-wide oversight.",
+    'UAS Logistics / Resupply':"Autonomous resupply flights operate BVLOS into changing weather and remote delivery points, raising risk that is often assessed inconsistently. FRAT standardizes the go/no-go score across every mission, auto-scores weather and route data, and enforces mitigation on high-risk sorties.",
+    'UAS Training':"UAS training programs put new operators through high sortie volumes, which makes a consistent, enforced risk-assessment process valuable for catching elevated-risk flights early. FRAT standardizes risk scoring across students and instructors, requires written mitigation on high-risk sorties, and gives the training safety office visibility into recurring hazards.",
+    'Part 91 Owner / Operator':"Part 91 operators often fly without the structured dispatch oversight of an airline, which makes a consistent, self-administered risk-assessment process especially valuable. FRAT gives owner-operators a standardized go/no-go score with auto-pulled weather and route data and a documented record, raising the safety discipline of the operation without adding a dispatch department.",
+    'Part 91K Fractional':"Fractional programs fly diverse crews and aircraft into a wide range of airports on demand, making standardized risk assessment key to consistent safety across the fleet. FRAT enforces one risk matrix across every crew, auto-scores weather and route factors, and gives program safety managers fleet-wide visibility and mitigation tracking.",
+    'Part 135 On-Demand Charter':"On-demand charter runs on schedule pressure, short-notice trips, and a wide destination mix, all of which can push crews toward accepting elevated risk. FRAT standardizes the risk assessment for every charter leg, requires documented mitigation on high-risk trips, and gives the operator an auditable record that supports its safety program.",
+    'Part 135 Scheduled Service':"Scheduled Part 135 service flies repetitive routes where risk can be under-weighted through familiarity, and into fields with real seasonal weather and performance challenges. FRAT keeps the go/no-go decision rigorous and consistent across crews, auto-scores weather and route data, and rolls up recurring hazards for the safety office.",
+    'Corporate Flight Department':"Corporate departments carry executives on demanding, schedule-driven itineraries, where a documented risk-assessment process protects both the passengers and the department. FRAT standardizes risk scoring across every trip, enforces written mitigation on high-risk flights, and gives the director of aviation fleet-wide visibility that supports the department SMS.",
+    'High Net Worth Individual':"Owner-flown and small-department operations often lack formal dispatch oversight, making a structured risk-assessment process especially valuable. FRAT gives a standardized go/no-go score with auto-pulled weather and route data and a documented record, adding professional-grade safety discipline to personal aircraft operations.",
+    'Air Ambulance / HEMS':"HEMS launches are urgent, weather-driven, and often into unprepared sites, exactly where rushed go/no-go calls raise risk. FRAT gives crews a fast, standardized risk score with auto-pulled weather, forces written mitigation on high-risk launches, and gives the safety office a documented record of every decision, directly supporting the operation SMS.",
+    'VIP / VVIP Transport':"VVIP transport combines schedule pressure, high-visibility passengers, and a wide airport mix, which can quietly drive acceptance of elevated risk. FRAT standardizes the risk assessment for every mission, auto-scores weather and route factors, and requires documented mitigation so no schedule pressure overrides a sound go/no-go decision."
+  };
+  Object.keys(FRAT_VPS).forEach(function(mission){
+    if (VALUE_PROPS[mission]) VALUE_PROPS[mission]['FRAT'] = FRAT_VPS[mission];
+  });
+})();
+
 function loadCustomVPs() {
   try { var s=JSON.parse(localStorage.getItem(VP_KEY)); if(s&&typeof s==='object') return s; } catch(e) {}
   return {};
@@ -1124,7 +1162,8 @@ var DEFAULT_PRODS = {
     {name:'Jeppesen Dispatch',        status:'prop'},
     {name:'Fleet Tracking',           status:'prop'},
     {name:'Ops Manager',              status:'prop'},
-    {name:'Jeppesen Runway Analysis', status:'prop'}
+    {name:'Jeppesen Runway Analysis', status:'prop'},
+    {name:'FRAT',                     status:'prop'}
   ]
 };
 
@@ -1160,7 +1199,8 @@ var DEFAULT_PRODS_BA = {
   right: [
     {name:'ForeFlight Dispatch', status:'prop'},
     {name:'Fleet Tracking',      status:'prop'},
-    {name:'Ops Manager',         status:'prop'}
+    {name:'Ops Manager',         status:'prop'},
+    {name:'FRAT',                status:'prop'}
   ]
 };
 
@@ -1436,7 +1476,7 @@ function clearCrest() {
 var imgCache = {};
 function getCachedImg(data, cb) {
   if (!data) { cb(null); return; }
-  var key = data.slice(0,60);
+  var key = data.length + ':' + data.slice(0,120) + data.slice(-60);
   if (imgCache[key]) { cb(imgCache[key]); return; }
   var img = new Image();
   img.onload  = function() { imgCache[key] = img; cb(img); };
@@ -2871,6 +2911,7 @@ function exportPDF() {
 // PRODUCT DESCRIPTIONS (what each product does — vertical-agnostic)
 // ─────────────────────────────────────────────────────────────────────────────
 var PROD_DESC = {
+  'FRAT':"ForeFlight's Flight Risk Assessment Tool (FRAT) lets an operator identify, score, and mitigate flight risk during pre-flight planning, right inside the same platform crews already use. It pairs custom risk questions your unit writes with system factors that score automatically from live flight, weather, and route data, then sorts each flight into color-coded Low, Medium, or High risk against thresholds you define, and it requires written mitigation plus automatic Safety Manager notification before any high-risk flight can be submitted. Safety Managers build the risk matrix in ForeFlight Web, pilots complete the FRAT in ForeFlight Mobile, and a fleet-wide dashboard rolls up scores, recurring hazards, and mitigation trends. It is a per-tail add-on available on Business and Military Flight Bag accounts.",
   'MFB Pro':"ForeFlight Mobile is the world's leading electronic flight bag. At the Pro level it gives aircrews a moving map with georeferenced VFR and IFR charts and approach plates, Plates on Maps, synthetic vision, and live ADS-B and GPS traffic, weather, and attitude. It also includes a full safety suite, with Hazard Advisor terrain and obstacle alerting, airspace and terrain profile views, and icing and turbulence visualization, plus flight planning, weather briefing, filing, checklists, and a synced logbook. In the military context it runs on the same ForeFlight Mobile app aviators use worldwide, paired with military charting and data.",
   'MFB Performance':"This tier includes everything in Pro and adds sharper planning and forecasting. It uses aircraft performance profiles for more accurate time and fuel calculations, handles fuel-load planning with automatic limit checks, and builds optimized routes for you. You also get 3D airport views, 3D flight preview and review, advanced weather-profile visualization, pre-departure clearances, D-ATIS, and integrated fuel pricing, so mission planners get a deeper look at performance and routing before they ever leave the ground.",
   'MFB One':"MFB One is ForeFlight's all-in-one Military Flight Bag subscription, an EFB purpose-built for military missions that pulls flight planning, weather, briefing, filing, and checklists into one app. It bundles the Jeppesen Military Chart Service along with global DoD and FLIP charts, aerial-refueling track display, and military-specific mission tools. Those include Emergency Route Abort Altitude calculations, Time-on-Target coordinates, access to over 20 million worldwide U.S. DoD obstacles, and U.S. Air Force weather briefings for authorized users.",

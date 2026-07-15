@@ -1,6 +1,6 @@
 {
   "name": "cap-app",
-  "version": "1.3.2",
+  "version": "1.3.3",
   "description": "CAP Generator — ForeFlight/Jeppesen Military Aviation Sales Tool",
   "main": "main.js",
   "scripts": {

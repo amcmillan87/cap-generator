@@ -3068,7 +3068,6 @@ function buildPresentationHTML(shots) {
   var dateStr  = new Date().toLocaleDateString('en-US',{year:'numeric',month:'long',day:'numeric'});
   var seName   = (function(){ try{ return localStorage.getItem('cap_se_v1')||''; }catch(e){ return ''; } })();
   var crest    = (function(){ try{ return localStorage.getItem(CREST_KEY)||''; }catch(e){ return ''; } })();
-  var acData   = (function(){ try{ var db=loadAC(); for(var i=0;i<db.length;i++){ if(db[i].model===STATE.model && db[i].branch===STATE.branch) return db[i].imageData||''; } }catch(e){} return ''; })();
 
   // Subtitle line under the customer name
   var subParts = [];
@@ -3124,8 +3123,7 @@ function buildPresentationHTML(shots) {
   // Summary ecosystem chips
   var chips = proposed.map(function(p){ return '<span>'+esc(p.name)+'</span>'; }).join('');
 
-  var heroCrest = crest ? '<img class="hero-crest" src="'+crest+'" alt="crest">' : '';
-  var heroAc    = acData ? '<div class="hero-ac"><img src="'+acData+'" alt="'+esc(STATE.model||'aircraft')+'"></div>' : '';
+  var heroLogo  = crest ? '<div class="hero-logo"><img class="hero-crest" src="'+crest+'" alt="logo"></div>' : '';
 
   var doc =
 '<!DOCTYPE html><html lang="en"><head>'+
@@ -3154,10 +3152,9 @@ function buildPresentationHTML(shots) {
 '.hero-scrim{position:absolute;inset:0;z-index:1;background:linear-gradient(105deg,var(--navy) 30%,rgba(0,22,41,.82) 55%,rgba(0,22,41,.45) 100%)}'+
 '.hero-inner{position:relative;z-index:2;max-width:1400px;display:flex;align-items:stretch;gap:clamp(30px,5vw,70px)}'+
 '.hero-copy{flex:1 1 auto;min-width:0;align-self:center}'+
-'.hero-crest{height:clamp(84px,9vw,132px);width:auto;margin-bottom:22px;display:block}'+
-'.hero-ac{flex:0 1 46%;display:flex;align-items:center;justify-content:center;min-width:0}'+
-'.hero-ac img{max-height:100%;max-width:100%;width:auto;height:auto;object-fit:contain;filter:drop-shadow(0 24px 50px rgba(0,0,0,.55))}'+
-'@media(max-width:900px){.hero-inner{flex-direction:column;align-items:flex-start}.hero-ac{flex:none;width:100%;max-height:40vh;margin-top:10px}}'+
+'.hero-logo{flex:0 1 46%;display:flex;align-items:center;justify-content:center;min-width:0}'+
+'.hero-crest{max-width:100%;max-height:min(60vh,360px);width:auto;height:auto;object-fit:contain;display:block;filter:drop-shadow(0 24px 50px rgba(0,0,0,.45))}'+
+'@media(max-width:900px){.hero-inner{flex-direction:column;align-items:flex-start}.hero-logo{flex:none;justify-content:flex-start;max-height:34vh;margin-top:6px}.hero-crest{max-height:34vh}}'+
 '.hero-brand{font-weight:800;color:#fff;font-size:clamp(16px,1.7vw,22px);margin-bottom:18px;opacity:.9}'+
 '.hero-title{font-weight:900;font-size:clamp(40px,7vw,96px);line-height:.99;letter-spacing:-2px}'+
 '.hero-sub{color:var(--orange);font-weight:700;font-size:clamp(16px,1.7vw,24px);margin-top:22px;max-width:44ch}'+
@@ -3206,7 +3203,6 @@ function buildPresentationHTML(shots) {
   '<div class="hero-scrim"></div>'+
   '<div class="hero-inner reveal">'+
     '<div class="hero-copy">'+
-      heroCrest+
       '<div class="eyebrow">'+esc(customer)+'&nbsp;|&nbsp; Solution Briefing</div>'+
       '<div class="hero-brand">Jeppesen ForeFlight</div>'+
       '<h1 class="hero-title">'+esc(customer)+'</h1>'+
@@ -3214,7 +3210,7 @@ function buildPresentationHTML(shots) {
       '<div class="pills"><span>'+esc(cfg.name)+'</span><span>Proposed Solutions</span></div>'+
       '<div class="scroll-cue">Scroll <span>&#8595;</span></div>'+
     '</div>'+
-    heroAc+
+    heroLogo+
   '</div>'+
 '</section>'+
 '<section class="panel agenda"><div class="wrap reveal"><div class="eyebrow">What we\'ll cover</div><h2 class="headline">Agenda</h2><ol class="agenda-list">'+agenda+'</ol></div></section>'+

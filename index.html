@@ -3088,6 +3088,25 @@ function buildPresentationHTML(shots) {
     return '<a href="#p'+i+'" class="link">'+esc(p.name)+'</a>';
   }).join('') + '<a href="#summary" class="link">Summary</a>';
 
+  // Condense a paragraph into up to `max` key points (presentation only — source text is untouched)
+  function keyPoints(text, max) {
+    var s = String(text||'').replace(/\s+/g,' ').trim();
+    if (!s) return [];
+    s = s.replace(/U\.S\./g,'U#S#').replace(/(\d)\.(\d)/g,'$1#d#$2');
+    var m = s.match(/[^.!?]+[.!?]+/g) || [s];
+    var out = [];
+    for (var i=0; i<m.length && out.length<max; i++) {
+      var seg = m[i].replace(/U#S#/g,'U.S.').replace(/(\d)#d#(\d)/g,'$1.$2').trim();
+      if (seg) out.push(seg);
+    }
+    return out;
+  }
+  function kpList(text, max) {
+    var pts = keyPoints(text, max);
+    if (!pts.length) return '';
+    return '<ul class="kp">' + pts.map(function(x){ return '<li>'+esc(x)+'</li>'; }).join('') + '</ul>';
+  }
+
   // Product sections (alternating text side)
   var sections = proposed.map(function(p,i){
     var side  = (i%2===0) ? 'right' : 'left';
@@ -3096,13 +3115,13 @@ function buildPresentationHTML(shots) {
     var num   = ('0'+(i+1)).slice(-2);
     var opt   = shots[p.name] || {};
     var vpBlock = vp
-      ? '<div class="subhead">Why it matters for '+esc(customer)+'</div><p class="lead">'+esc(vp)+'</p>'
+      ? '<div class="subhead">Why it matters for '+esc(customer)+'</div>'+kpList(vp,2)
       : '';
     var textCol =
       '<div class="eyebrow">Proposed Solution '+num+'</div>'+
       '<h2 class="headline">'+esc(p.name)+'</h2>'+
       '<div class="subhead">What is it?</div>'+
-      '<p class="lead">'+esc(desc)+'</p>'+
+      kpList(desc,3)+
       vpBlock;
 
     // Full-width text slide (no screenshot)
@@ -3111,7 +3130,7 @@ function buildPresentationHTML(shots) {
     }
     // Media column: uploaded screenshot, or placeholder
     var media = opt.dataUri
-      ? '<img src="'+opt.dataUri+'" alt="'+esc(p.name)+' screenshot" style="border-radius:9px;width:100%;display:block">'
+      ? '<div class="pbox"><img class="pimg" data-parallax="0.12" data-pscale="1.20" data-pclamp="0.075" src="'+opt.dataUri+'" alt="'+esc(p.name)+' screenshot"></div>'
       : '<div class="shot-ph"><div class="shot-ph-icon">&#128247;</div><div class="shot-ph-name">'+esc(p.name)+'</div><div class="shot-ph-sub">Product screenshot</div></div>';
     return ''+
     '<section class="panel content '+side+'" id="p'+i+'"><div class="grid2">'+
@@ -3146,9 +3165,14 @@ function buildPresentationHTML(shots) {
 '.headline{font-weight:800;font-size:clamp(28px,3.6vw,46px);line-height:1.08;letter-spacing:-.5px}'+
 '.lead{color:var(--cream);font-size:clamp(16px,1.4vw,20px);margin:14px 0 22px;max-width:52ch;font-weight:500}'+
 '.lead.center{margin-left:auto;margin-right:auto;text-align:center}'+
-'.subhead{color:var(--cyan);font-weight:700;text-transform:uppercase;letter-spacing:1px;font-size:13px;margin:18px 0 4px}'+
+'.subhead{color:var(--cyan);font-weight:700;text-transform:uppercase;letter-spacing:1px;font-size:13px;margin:18px 0 6px}'+
+'.kp{list-style:none;margin:8px 0 0}'+
+'.kp li{position:relative;padding-left:22px;margin:10px 0;font-size:clamp(15px,1.25vw,18px);line-height:1.45;color:var(--cream)}'+
+'.kp li:before{content:"";position:absolute;left:2px;top:.62em;width:7px;height:7px;border-radius:50%;background:var(--orange)}'+
+'.pbox{overflow:hidden;border-radius:9px;line-height:0}'+
+'.pbox .pimg{width:100%;display:block;transform:scale(1.20);transform-origin:center;will-change:transform}'+
 '.hero{min-height:100vh;display:flex;align-items:center;padding-top:120px;overflow:hidden}'+
-'.hero-bg{position:absolute;inset:-12% 0;background-size:cover;background-position:center;z-index:0}'+
+'.hero-bg{position:absolute;inset:-18% 0;background-size:cover;background-position:center;z-index:0;will-change:transform}'+
 '.hero-scrim{position:absolute;inset:0;z-index:1;background:linear-gradient(105deg,var(--navy) 30%,rgba(0,22,41,.82) 55%,rgba(0,22,41,.45) 100%)}'+
 '.hero-inner{position:relative;z-index:2;max-width:1400px;display:flex;align-items:stretch;gap:clamp(30px,5vw,70px)}'+
 '.hero-copy{flex:1 1 auto;min-width:0;align-self:center}'+
@@ -3164,7 +3188,7 @@ function buildPresentationHTML(shots) {
 '.scroll-cue span{display:inline-block;animation:bounce 1.6s infinite;margin-left:6px;color:var(--orange)}'+
 '@keyframes bounce{0%,100%{transform:translateY(0)}50%{transform:translateY(6px)}}'+
 '.divider{min-height:70vh;display:flex;align-items:center;overflow:hidden}'+
-'.divider-bg{position:absolute;inset:-12% 0;background-size:cover;z-index:0}'+
+'.divider-bg{position:absolute;inset:-18% 0;background-size:cover;z-index:0;will-change:transform}'+
 '.divider-scrim{position:absolute;inset:0;z-index:1;background:radial-gradient(120% 100% at 20% 50%,rgba(0,22,41,.55),rgba(0,22,41,.93))}'+
 '.divider-inner{position:relative;z-index:2;max-width:1100px}'+
 '.divider-num{font-weight:900;font-size:clamp(60px,12vw,170px);color:rgba(255,121,26,.18);line-height:.8;letter-spacing:-4px;margin-bottom:-10px}'+
@@ -3199,7 +3223,7 @@ function buildPresentationHTML(shots) {
 '<div id="progress"></div>'+
 '<nav class="topnav" id="topnav"><a href="#top" class="logo">Jeppesen <b>ForeFlight</b></a><div class="links">'+navLinks+'</div></nav>'+
 '<section class="panel hero" id="top">'+
-  '<div class="hero-bg" style="background:repeating-radial-gradient(circle at 75% 30%, rgba(255,255,255,.045) 0 1px, transparent 1px 78px), radial-gradient(140% 120% at 15% 20%, rgba(25,162,174,.32), transparent 55%), radial-gradient(120% 100% at 85% 80%, rgba(255,121,26,.24), transparent 60%), linear-gradient(160deg,#001629,#06223b 55%,#001629)"></div>'+
+  '<div class="hero-bg" data-parallax="0.12" data-pclamp="0.14" style="background:repeating-radial-gradient(circle at 75% 30%, rgba(255,255,255,.045) 0 1px, transparent 1px 78px), radial-gradient(140% 120% at 15% 20%, rgba(25,162,174,.32), transparent 55%), radial-gradient(120% 100% at 85% 80%, rgba(255,121,26,.24), transparent 60%), linear-gradient(160deg,#001629,#06223b 55%,#001629)"></div>'+
   '<div class="hero-scrim"></div>'+
   '<div class="hero-inner reveal">'+
     '<div class="hero-copy">'+
@@ -3208,14 +3232,14 @@ function buildPresentationHTML(shots) {
       '<h1 class="hero-title">'+esc(customer)+'</h1>'+
       (subLine ? '<div class="hero-sub">'+esc(subLine)+'</div>' : '')+
       '<div class="pills"><span>'+esc(cfg.name)+'</span><span>Proposed Solutions</span></div>'+
-      '<div class="scroll-cue">Scroll <span>&#8595;</span></div>'+
+      '<div class="scroll-cue">Scroll or press <span>&#8594;</span> to advance</div>'+
     '</div>'+
     heroLogo+
   '</div>'+
 '</section>'+
 '<section class="panel agenda"><div class="wrap reveal"><div class="eyebrow">What we\'ll cover</div><h2 class="headline">Agenda</h2><ol class="agenda-list">'+agenda+'</ol></div></section>'+
 '<section class="panel divider" id="solutions">'+
-  '<div class="divider-bg" style="background:repeating-radial-gradient(circle at 20% 70%, rgba(255,255,255,.04) 0 1px, transparent 1px 80px), radial-gradient(130% 110% at 80% 25%, rgba(106,244,249,.2), transparent 55%), radial-gradient(120% 100% at 20% 85%, rgba(255,121,26,.26), transparent 60%), linear-gradient(160deg,#06223b,#001629 60%,#001629)"></div>'+
+  '<div class="divider-bg" data-parallax="0.12" data-pclamp="0.14" style="background:repeating-radial-gradient(circle at 20% 70%, rgba(255,255,255,.04) 0 1px, transparent 1px 80px), radial-gradient(130% 110% at 80% 25%, rgba(106,244,249,.2), transparent 55%), radial-gradient(120% 100% at 20% 85%, rgba(255,121,26,.26), transparent 60%), linear-gradient(160deg,#06223b,#001629 60%,#001629)"></div>'+
   '<div class="divider-scrim"></div>'+
   '<div class="divider-inner reveal"><div class="divider-num">01</div><div class="eyebrow">Recommended for '+esc(customer)+'</div><h2 class="divider-title">Proposed Solutions</h2><div class="divider-sub">A tailored set of Jeppesen ForeFlight capabilities'+(mission?' for '+esc(mission)+' operations':'')+'.</div></div>'+
 '</section>'+
@@ -3233,6 +3257,20 @@ sections+
 'if("IntersectionObserver" in window){var io=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){show(e.target);io.unobserve(e.target);}});},{threshold:0.12});reveals.forEach(function(el){io.observe(el);});}else{reveals.forEach(show);}'+
 'reveals.forEach(function(el){if(inView(el))show(el);});'+
 'setTimeout(function(){reveals.forEach(show);},1600);'+
+'var pels=[].slice.call(document.querySelectorAll("[data-parallax]"));'+
+'function parallax(){var vh=window.innerHeight||document.documentElement.clientHeight;for(var i=0;i<pels.length;i++){var el=pels[i],sp=parseFloat(el.getAttribute("data-parallax"))||0.12,r=el.getBoundingClientRect(),delta=(r.top+r.height/2)-vh/2,ty=-delta*sp,frac=parseFloat(el.getAttribute("data-pclamp"))||0.14,lim=r.height*frac;if(ty>lim)ty=lim;if(ty<-lim)ty=-lim;var sc=el.getAttribute("data-pscale");el.style.transform="translate3d(0,"+ty.toFixed(1)+"px,0)"+(sc?(" scale("+sc+")"):"");}}'+
+'var pTick=false;function onPScroll(){if(pTick)return;pTick=true;requestAnimationFrame(function(){parallax();pTick=false;});}'+
+'window.addEventListener("scroll",onPScroll,{passive:true});window.addEventListener("resize",parallax);parallax();'+
+'var secs=[].slice.call(document.querySelectorAll("section, footer"));'+
+'function docTop(el){return el.getBoundingClientRect().top+(window.pageYOffset||document.documentElement.scrollTop);}'+
+'function curIndex(){var y=(window.pageYOffset||document.documentElement.scrollTop)+12,idx=0;for(var i=0;i<secs.length;i++){if(docTop(secs[i])<=y)idx=i;}return idx;}'+
+'function goTo(i){i=Math.max(0,Math.min(secs.length-1,i));if(secs[i])secs[i].scrollIntoView({behavior:"smooth",block:"start"});}'+
+'window.addEventListener("keydown",function(e){'+
+'if(e.metaKey||e.ctrlKey||e.altKey)return;'+
+'var k=e.key,nx=(k==="ArrowDown"||k==="ArrowRight"||k==="PageDown"||k===" "||k==="Spacebar"||(k==="Tab"&&!e.shiftKey)),pv=(k==="ArrowUp"||k==="ArrowLeft"||k==="PageUp"||(k==="Tab"&&e.shiftKey));'+
+'if(k==="Home"){e.preventDefault();goTo(0);return;}if(k==="End"){e.preventDefault();goTo(secs.length-1);return;}'+
+'if(!nx&&!pv)return;e.preventDefault();goTo(curIndex()+(nx?1:-1));'+
+'});'+
 '})();'+
 '<\/script>'+
 '</body></html>';
